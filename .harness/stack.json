@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "suite_version": "0.6.0",
+  "project": "saas-identity-platform-kotlin",
+  "stack": "ktor",
+  "gates": {
+    "L1": {
+      "name": "格式（ktfmt）",
+      "cmd": [
+        "gradle",
+        "ktfmtCheck"
+      ],
+      "fix": "先确认 gradle 9.8.1 在 PATH（gradle --version）。运行 gradle ktfmtFormat 后重试；格式抖动说明编辑器插件与仓内 ktfmt 版本不一致，以仓为准。"
+    },
+    "L2": {
+      "name": "静态检查（detekt）",
+      "cmd": [
+        "gradle",
+        "detekt"
+      ],
+      "fix": "先确认 gradle 在 PATH。逐条修复 detekt 报告；规则误伤在 config/detekt/detekt.yml 加定向豁免并写理由，禁改门定义。"
+    },
+    "L3": {
+      "name": "编译",
+      "cmd": [
+        "gradle",
+        "compileKotlin"
+      ],
+      "fix": "先确认 gradle 在 PATH。编译错回代码修；首跑下依赖几分钟正常（Maven Central），反复卡死先探活（CPU+TCP）再报。"
+    },
+    "L4": {
+      "name": "测试",
+      "cmd": [
+        "gradle",
+        "test"
+      ],
+      "fix": "先确认 gradle 在 PATH，再让测试变绿。"
+    }
+  },
+  "trace_cmd": [
+    "gradle",
+    "test",
+    "-Dharness.trace=true"
+  ],
+  "trace_env": {},
+  "source_dirs": [
+    "src/main/kotlin"
+  ],
+  "test_dirs": [
+    "src/test/kotlin"
+  ]
+}

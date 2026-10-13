@@ -1,0 +1,9 @@
+.gradle/
+build/
+.env
+# suite 运行态（家族仓 .gitignore 惯例，见 docs/conventions/submodule.md §7）
+.state/trace.json
+.state/gate.json
+.state/gate.partial.json
+.state/alignment.json
+.state/tree-change.json

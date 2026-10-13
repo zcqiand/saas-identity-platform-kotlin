@@ -1,0 +1,5 @@
+build:
+  maxIssues: 0
+complexity:
+  TooManyFunctions:
+    active: false   # HarnessTraceListener 是一个职责单一的 porter 类，10 个小私有方法是形态本身
