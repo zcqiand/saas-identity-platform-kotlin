@@ -48,6 +48,7 @@ detekt {
   // 显式枚举 source 是为了把排除精确钉在生成树 saas/identity/shared 上——test 树照常全覆盖，
   // 不许陪葬。一棵树布局（ADR-0045 §2 修订）：整树排除 = 整树不误伤。
   // 占位符由 init_project.py 按仓名前缀渲染成本家族生成区路径（family_pkg_dir）。
+  // 本块保持 ktfmt 正形（单行 lambda）——渲染产物即门内合法形态，--sync 后无需 format 复位。
   source.setFrom(
       fileTree("src/main/kotlin") { exclude("saas/identity/shared/**") },
       fileTree("src/test/kotlin"),
