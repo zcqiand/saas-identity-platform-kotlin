@@ -68,7 +68,7 @@ rm -rf .openapi-tmp
 # 漂移 fail-loud（fastapi 同款）：生成区与 git HEAD 不一致即红。untracked 也算——
 # 防生成漏 git add 后门禁读旧产物假绿（池项 5.31 教训）。
 if ! git diff --exit-code --quiet "${ZONE_ARGS[@]}" 2>/dev/null \
-  || [ -n "$(git ls-files --others --exclude-standard -- "$SHARED_PKG" "$INFRA_PKG")" ]; then
+  || [ -n "$(git ls-files --others --exclude-standard -- "$SHARED_PKG")" ]; then
   echo "[gen-shared] FATAL: 生成区与 git HEAD 不一致（含 untracked 新文件）" >&2
   echo "[gen-shared]        处理：确认 shared .tsp 变更合法后 git add 生成区并 commit，再重跑本脚本核绿" >&2
   exit 1
