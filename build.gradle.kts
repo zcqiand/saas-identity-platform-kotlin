@@ -30,7 +30,8 @@ dependencies {
   testImplementation("org.junit.platform:junit-platform-engine")
   testImplementation("org.junit.platform:junit-platform-launcher")
   // 实体层（ADR-0046 DB-First）：exposed-bom 收口禁裸写版本；r2dbc 驱动 BOM 外钉 exact。
-  // core=Table DSL；kotlin-datetime=timestamp/date 系；json=jsonb；r2dbc=Phase 3 挂 Ktor 协程。
+  // core=Table DSL；kotlin-datetime=timestamp/date 系（包名 v1.datetime，无 .kotlin 段）；
+  // json=jsonb；r2dbc=Phase 3 挂 Ktor 协程。
   implementation(platform("org.jetbrains.exposed:exposed-bom:1.5.1"))
   implementation("org.jetbrains.exposed:exposed-core")
   implementation("org.jetbrains.exposed:exposed-kotlin-datetime")
@@ -51,13 +52,15 @@ tasks.test {
 detekt {
   buildUponDefaultConfig = true
   config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
-  // 生成区禁手改（gen-shared.sh 产物），不进静态门（fastapi ruff extend-exclude 同款纪律）。
-  // 显式枚举 source 是为了把排除精确钉在生成树 saas/identity/shared 上——test 树照常全覆盖，
-  // 不许陪葬。一棵树布局（ADR-0045 §2 修订）：整树排除 = 整树不误伤。
-  // 占位符由 init_project.py 按仓名前缀渲染成本家族生成区路径（family_pkg_dir）。
-  // 本块保持 ktfmt 正形（单行 lambda）——渲染产物即门内合法形态，--sync 后无需 format 复位。
+  // 生成区禁手改（gen-shared.sh / scaffold-entities.sh 产物），不进静态门
+  // （fastapi ruff extend-exclude 同款纪律）。显式枚举 source 是为了把排除精确钉在
+  // 生成树 saas/identity/shared + saas/identity/entity 上——test 树照常全覆盖，不许陪葬。
+  // 一棵树布局（ADR-0045 §2 修订）：整树排除 = 整树不误伤。
+  // 占位符由 init_project.py 按仓名前缀渲染成本家族生成区路径（family_pkg_dir /
+  // entity_pkg_dir）。本块保持 ktfmt 正形（单行 lambda）——渲染产物即门内合法形态，
+  // --sync 后无需 format 复位。
   source.setFrom(
-      fileTree("src/main/kotlin") { exclude("saas/identity/shared/**") },
+      fileTree("src/main/kotlin") { exclude("saas/identity/shared/**", "saas/identity/entity/**") },
       fileTree("src/test/kotlin"),
   )
 }
@@ -71,4 +74,5 @@ ktfmt {
 // SourceTask → 任务级 exclude。生成区先删后写自愈，scratch 探针可证伪。
 tasks.withType<com.ncorti.ktfmt.gradle.tasks.KtfmtBaseTask>().configureEach {
   exclude("saas/identity/shared/**")
+  exclude("saas/identity/entity/**")
 }
