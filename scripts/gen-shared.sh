@@ -36,6 +36,7 @@ npx --yes @openapitools/openapi-generator-cli generate \
   --library ktor \
   -i "$SHARED_DIR/generated/openapi/openapi.yaml" \
   -o "$GEN_TMP" \
+  -t scripts/openapi-templates \
   --package-name saas.identity.shared \
   --model-package saas.identity.shared.models \
   --api-package saas.identity.shared.api \
@@ -58,6 +59,10 @@ for f in Paths.kt infrastructure/ApiKeyAuth.kt; do
   fi
 done
 rm -rf "$SHARED_PKG"
+# 空名枚举项定点补名：generator 对空串枚举值给空标识符（产非法 Kotlin `("")`）；
+# 覆写模板已用 @SerialName 保 wire 值，此处补名对齐 java generator 的 EMPTY 惯例
+# （java 端对空/保留字即落 EMPTY）。对 generator 新输出跑，天然幂等。
+find "$GEN_SHARED" -name '*.kt' -exec sed -i -E 's/^    \(""\)([,;]?)$/    EMPTY("")\1/' {} +
 mkdir -p "$SHARED_PKG"
 cp -r "$GEN_SHARED/api" "$SHARED_PKG/api"
 cp -r "$GEN_SHARED/models" "$SHARED_PKG/models"

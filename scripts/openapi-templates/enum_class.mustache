@@ -1,0 +1,37 @@
+{{! 模板覆写：基于 openapi-generator 7.25.0 kotlin-server/ktor enum_class.mustache。
+  -t 自定义模板按文件名扁平查找（实证：根级 t-dir 下 enum_class.mustache 生效，
+  kotlin-server/ 与 kotlin-server/libraries/ktor/ 子目录布局均不被吃进）。
+  改动：每个枚举项加 @kotlinx.serialization.SerialName(原始值)。kotlinx 按项 name
+  序列化；空串枚举值（lab ReceiptResult 空串项）无法作 Kotlin 标识符，wire 值须由
+  SerialName 保真。普通项 serialName==identifier==value，注解冗余但 wire 中性。
+  空名标识符由 gen-shared.sh 管道内定点补名对齐 java generator 的 EMPTY 惯例
+  （jmustache 视空串为真值，反转段不触发，模板内表达不了）。
+  注意：本注释内禁出现双大括号——mustache 注释遇之提前闭合，剩余散文会渲进产物。
+  上游升级时对 jar 内原版 diff 本文件复核。}}
+/**
+* {{{description}}}
+* Values: {{#allowableValues}}{{#enumVars}}{{&name}}{{^-last}},{{/-last}}{{/enumVars}}{{/allowableValues}}
+*/
+enum class {{classname}}(val value: {{dataType}}) {
+{{#allowableValues}}{{#enumVars}}
+    {{#enumDescription}}
+    /**
+    * {{.}}
+    */
+    {{/enumDescription}}
+    @kotlinx.serialization.SerialName({{{value}}})
+    {{&name}}({{{value}}}){{^-last}},{{/-last}}{{#-last}};{{/-last}}
+{{/enumVars}}{{/allowableValues}}
+{{#delegatePattern}}
+
+    companion object {
+        /**
+         * Returns the enum individual associated with the [value] passed as parameter.
+         *
+         * @throws IllegalArgumentException if no enum individual is associated with the [value] passed as parameter.
+         */
+        fun fromValue(value: {{{dataType}}}): {{classname}} =
+            values().firstOrNull { it.value == value } ?: throw IllegalArgumentException("No enum constant {{classname}}.$value")
+    }
+{{/delegatePattern}}
+}

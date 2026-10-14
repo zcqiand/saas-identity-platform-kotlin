@@ -18,8 +18,10 @@ package saas.identity.shared.models
 */
 enum class TenantStatus(val value: kotlin.String) {
 
+    @kotlinx.serialization.SerialName("active")
     active("active"),
 
+    @kotlinx.serialization.SerialName("suspended")
     suspended("suspended");
 
 }

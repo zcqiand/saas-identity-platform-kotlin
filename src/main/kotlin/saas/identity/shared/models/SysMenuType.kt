@@ -18,10 +18,13 @@ package saas.identity.shared.models
 */
 enum class SysMenuType(val value: kotlin.String) {
 
+    @kotlinx.serialization.SerialName("directory")
     directory("directory"),
 
+    @kotlinx.serialization.SerialName("menu")
     menu("menu"),
 
+    @kotlinx.serialization.SerialName("button")
     button("button");
 
 }
