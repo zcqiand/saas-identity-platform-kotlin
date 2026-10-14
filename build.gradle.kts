@@ -29,6 +29,13 @@ dependencies {
   // 必须显式声明，版本由 junit-bom 管。
   testImplementation("org.junit.platform:junit-platform-engine")
   testImplementation("org.junit.platform:junit-platform-launcher")
+  // 实体层（ADR-0046 DB-First）：exposed-bom 收口禁裸写版本；r2dbc 驱动 BOM 外钉 exact。
+  // core=Table DSL；kotlin-datetime=timestamp/date 系；json=jsonb；r2dbc=Phase 3 挂 Ktor 协程。
+  implementation(platform("org.jetbrains.exposed:exposed-bom:1.5.1"))
+  implementation("org.jetbrains.exposed:exposed-core")
+  implementation("org.jetbrains.exposed:exposed-kotlin-datetime")
+  implementation("org.jetbrains.exposed:exposed-json")
+  implementation("org.postgresql:r2dbc-postgresql:1.1.3.RELEASE")
 }
 
 kotlin { jvmToolchain(21) }
