@@ -7,3 +7,6 @@ build/
 .state/gate.partial.json
 .state/alignment.json
 .state/tree-change.json
+
+# openapi-generator 临时目录（gen-shared.sh 中转，2026-10-15 Phase 2 收尾补登记）
+.openapi-tmp/

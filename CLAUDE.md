@@ -22,10 +22,12 @@ SaaS 身份平台 Kotlin/Ktor 端（`saas-identity-platform-kotlin`，技术栈 
 - 禁止 SERVER_PORT 等 env 键写默认值兜底（fail-fast，suite-hard-rules §1）
 - **API 面只认生成物**：`src/main/kotlin/saas/identity/shared/` 整树 = `scripts/gen-shared.sh`
   产物，禁手改（suite 硬规则 §4）；改 shared 契约 → 重跑该脚本再跑门禁（springboot 同款）
+- **实体 DB-First**：`src/main/kotlin/saas/identity/entity/` 整树 = `scripts/scaffold-entities.sh`
+  反推 `saas_dev` 产物，禁手改（ADR-0046）；`DATABASE_URL` 必填显式传入，先删后写 + 漂移 fail-loud
 
 ## 3. 技术栈与版本（钉死于 version-lock.json）
 
-Kotlin 2.4.21 + Ktor 3.6.0 (Netty, ktor-bom) + Gradle 9.8.1 (Kotlin DSL, wrapper 腾讯镜像) + JUnit 6.1.3 + ktfmt 0.27.0 + detekt 1.23.8 + openapi-generator 7.25.0 (kotlin-server/ktor)。明细见 `version-lock.json` 与 README.md 技术栈表。
+Kotlin 2.4.21 + Ktor 3.6.0 (Netty, ktor-bom) + Exposed 1.5.1 (exposed-bom) + r2dbc-postgresql 1.1.3.RELEASE + Gradle 9.8.1 (Kotlin DSL, wrapper 腾讯镜像) + JUnit 6.1.3 + ktfmt 0.27.0 + detekt 1.23.8 + openapi-generator 7.25.0 (kotlin-server/ktor)。明细见 `version-lock.json` 与 README.md 技术栈表。
 
 门禁命令见 `.harness/stack.json`。**不要改它来让门变松。**
 
