@@ -2,4 +2,5 @@ build:
   maxIssues: 0
 complexity:
   TooManyFunctions:
-    active: false   # HarnessTraceListener 是一个职责单一的 porter 类，10 个小私有方法是形态本身
+    active: true
+    excludes: ['**/HarnessTraceListener.kt'] # porter 类职责单一，10 个小私有方法是形态本身（定向豁免替代 Phase 0 全局关，Phase 1 终审修复项）
