@@ -81,6 +81,11 @@ function mapColumn(c) {
     case "timestamptz": return { dsl: `timestampWithTimeZone(${q})`, mod: "datetime" };
     case "timestamp": return { dsl: `timestamp(${q})`, mod: "datetime" };
     case "date": return { dsl: `date(${q})`, mod: "datetime" };
+    // numeric 与 decimal 在 PG 里同 udt（numeric）；精度必随列返回，缺精度=类型异常，fail-loud
+    case "numeric":
+      if (c.numeric_precision == null || c.numeric_scale == null)
+        throw new Error(`numeric 列缺精度元数据: ${c.table_name}.${c.column_name}`);
+      return { dsl: `decimal(${q}, ${c.numeric_precision}, ${c.numeric_scale})`, mod: "core" };
     default:
       // PG enum（USER-DEFINED）→ text 直通 + 注释（ADR-0046 后果①：Phase 3 写路径再定约束）
       if (c.data_type === "USER-DEFINED")
@@ -143,7 +148,8 @@ async function main() {
   for (const tbl of filtered) {
     const { rows: cols } = await client.query(
       `
-      SELECT column_name, data_type, udt_name, is_nullable, character_maximum_length
+      SELECT column_name, data_type, udt_name, is_nullable, character_maximum_length,
+             numeric_precision, numeric_scale
       FROM information_schema.columns
       WHERE table_schema = 'public' AND table_name = $1
       ORDER BY ordinal_position
