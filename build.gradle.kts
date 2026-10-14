@@ -49,10 +49,8 @@ detekt {
   // 不许陪葬。一棵树布局（ADR-0045 §2 修订）：整树排除 = 整树不误伤。
   // 占位符由 init_project.py 按仓名前缀渲染成本家族生成区路径（family_pkg_dir）。
   source.setFrom(
-    fileTree("src/main/kotlin") {
-      exclude("saas/identity/shared/**")
-    },
-    fileTree("src/test/kotlin"),
+      fileTree("src/main/kotlin") { exclude("saas/identity/shared/**") },
+      fileTree("src/test/kotlin"),
   )
 }
 
