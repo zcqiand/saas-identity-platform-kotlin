@@ -9,9 +9,11 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import javax.crypto.spec.SecretKeySpec
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.junit.jupiter.api.AfterAll
@@ -23,6 +25,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import saas.identity.entity.OauthAccessTokenTable
 import saas.identity.entity.OauthRefreshTokenTable
+import saas.identity.entity.SysUserTable
+import saas.identity.entity.TenantMemberTable
 import saas.identity.shared.models.ErrorResponse
 import saas.identity.shared.models.LoginResponse
 
@@ -178,5 +182,35 @@ class AuthLoginTest {
         dto.availableTenants.map { it.tenantId }.toSet(),
     )
     assertEquals(ScratchDb.TENANT1, dto.currentTenantId)
+  }
+
+  @Test
+  fun outOfDomainUserStatusReportsDisabled() = runBlocking {
+    // 家族镜像语义：sys_user.status 域外值兜底 disabled（fastapi assemble.py:40），
+    // Phase 3 曾兜 active（终审 deferred minor，Phase 4 搭车修）。列形照 ScratchDb seed。
+    val oddUserId = Uuid.random()
+    suspendTransaction(db) {
+      SysUserTable.insert {
+        it[id] = oddUserId
+        it[username] = "oddstatus"
+        it[password] = "plain:dev123456"
+        it[email] = "odd@example.com"
+        it[status] = 9 // 域外：0=disabled 1=active 2=invited 之外
+        it[failedAttempts] = 0
+        it[createdAt] = java.time.OffsetDateTime.parse("2026-01-01T00:00:00+00:00")
+        it[updatedAt] = java.time.OffsetDateTime.parse("2026-01-01T00:00:00+00:00")
+      }
+      TenantMemberTable.insert {
+        it[id] = Uuid.random()
+        it[tenantId] = ScratchDb.TENANT1
+        it[userId] = oddUserId
+        it[isOwner] = false
+        it[status] = 1
+        it[createdAt] = java.time.OffsetDateTime.parse("2026-01-01T00:00:00+00:00")
+        it[updatedAt] = java.time.OffsetDateTime.parse("2026-01-01T00:00:00+00:00")
+      }
+    }
+    val dto = decodeLogin(postLogin(loginBody("oddstatus", "dev123456")))
+    assertEquals("disabled", dto.user.status.toString()) // 现实现兜 active → RED
   }
 }

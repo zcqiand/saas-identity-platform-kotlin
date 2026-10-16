@@ -2,7 +2,10 @@ package saas.identity.impl
 
 import io.ktor.server.routing.RoutingCall
 import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter.ISO_OFFSET_DATE_TIME
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
@@ -187,19 +190,21 @@ class AuthApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssu
           }
           .map { it[TenantMemberRoleTable.roleId].toString() }
 
+  // 域外值兜底 disabled（fastapi assemble.py 镜像；Phase 4 搭车修）
   private fun userStatusFromDb(value: Short): SysUserStatus =
       when (value.toInt()) {
         2 -> SysUserStatus.invited
         0 -> SysUserStatus.disabled
-        else -> SysUserStatus.active
+        else -> SysUserStatus.disabled
       }
 
+  // 同族兜底一致（登录路径只有 status==1 行进此函数，else 支纯镜像防御）
   private fun memberStatusFromDb(value: Short): TenantMemberStatus =
       when (value.toInt()) {
         2 -> TenantMemberStatus.invited
         STATUS_SUSPENDED -> TenantMemberStatus.suspended
         0 -> TenantMemberStatus.disabled
-        else -> TenantMemberStatus.active
+        else -> TenantMemberStatus.disabled
       }
 
   companion object {
@@ -212,5 +217,20 @@ class AuthApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssu
   }
 }
 
-/** ISO_OFFSET_DATE_TIME 序列化（家族 DTO createdAt/joinedAt 字符串口径）。 */
-private fun iso(value: OffsetDateTime): String = value.format(ISO_OFFSET_DATE_TIME)
+/**
+ * 家族 DTO createdAt/joinedAt 字符串口径，先归一 UTC 再串化（fastapi as_utc 镜像；Phase 4 搭车修——跨后端字符串漂移防位）。不用
+ * ISO_OFFSET_DATE_TIME：它对 UTC 输出 `Z` 尾，与 fastapi `isoformat()` 的 `+00:00` 口径漂移；此处钉 Python
+ * 形状——恒秒、小数非零才带、 `+00:00` 尾。internal 供测试锚定。
+ */
+internal fun iso(value: OffsetDateTime): String =
+    value.withOffsetSameInstant(ZoneOffset.UTC).format(UTC_ISO_FORMAT)
+
+/** fastapi datetime.isoformat() 镜像：恒秒 + 微秒非零才带小数 + `+HH:MM` 偏移。 */
+private const val FRACTION_DIGITS_MAX = 9
+
+private val UTC_ISO_FORMAT: DateTimeFormatter =
+    DateTimeFormatterBuilder()
+        .appendPattern("yyyy-MM-dd'T'HH:mm:ss")
+        .appendFraction(ChronoField.NANO_OF_SECOND, 0, FRACTION_DIGITS_MAX, true)
+        .appendOffset("+HH:MM", "+00:00")
+        .toFormatter()
