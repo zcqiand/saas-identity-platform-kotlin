@@ -24,6 +24,8 @@ SaaS 身份平台 Kotlin/Ktor 端（`saas-identity-platform-kotlin`，技术栈 
   产物，禁手改（suite 硬规则 §4）；改 shared 契约 → 重跑该脚本再跑门禁（springboot 同款）
 - **实体 DB-First**：`src/main/kotlin/saas/identity/entity/` 整树 = `scripts/scaffold-entities.sh`
   反推 `saas_dev` 产物，禁手改（ADR-0046）；`DATABASE_URL` 必填显式传入，先删后写 + 漂移 fail-loud
+- **业务手写区**：`src/main/kotlin/saas/identity/impl/` = 唯一业务手写目录，正常过
+  静态门；错误只抛类型化异常（StatusPages 映射），禁 route 内直接 respond
 
 ## 3. 技术栈与版本（钉死于 version-lock.json）
 
