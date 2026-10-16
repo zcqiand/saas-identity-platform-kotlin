@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param accessToken 
@@ -27,4 +28,22 @@ data class SwitchTenantResponse(
     val expiresAt: kotlin.String,
     val tenantId: kotlin.uuid.Uuid
 )
+{
+        fun validate() {
+            
+            
+            
+            try {
+        kotlin.uuid.Uuid.parse(tenantId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property tenantId should be a valid UUID",
+            parameterName = "tenantId",
+            validationType = "uuid",
+            actualValue = tenantId
+        )
+    }
+    
+        }
+}
 

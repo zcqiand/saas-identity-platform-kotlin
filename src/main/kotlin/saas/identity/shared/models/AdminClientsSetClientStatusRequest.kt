@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param status 
@@ -21,4 +22,9 @@ import kotlinx.serialization.Serializable
 data class AdminClientsSetClientStatusRequest(
     val status: kotlin.Int
 )
+{
+        fun validate() {
+            
+        }
+}
 

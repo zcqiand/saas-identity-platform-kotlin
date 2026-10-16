@@ -14,6 +14,7 @@ package saas.identity.shared.models
 import saas.identity.shared.models.TenantMembership
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param id 
@@ -28,4 +29,41 @@ data class CurrentUser(
     val email: kotlin.String? = null,
     val currentTenantId: kotlin.uuid.Uuid? = null
 )
+{
+        fun validate() {
+            try {
+        kotlin.uuid.Uuid.parse(id.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property id should be a valid UUID",
+            parameterName = "id",
+            validationType = "uuid",
+            actualValue = id
+        )
+    }
+    
+            memberships.forEach { it.validate() }
+    
+            if (!"^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$".toRegex().matches(email.toString())) {
+        throw BadParameterException(
+            message = "Property email should be a valid email",
+            parameterName = "email",
+            validationType = "email",
+            actualValue = email
+        )
+    }
+    
+            try {
+        kotlin.uuid.Uuid.parse(currentTenantId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property currentTenantId should be a valid UUID",
+            parameterName = "currentTenantId",
+            validationType = "uuid",
+            actualValue = currentTenantId
+        )
+    }
+    
+        }
+}
 

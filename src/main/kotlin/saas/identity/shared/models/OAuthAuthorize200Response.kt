@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param code 
@@ -23,4 +24,10 @@ data class OAuthAuthorize200Response(
     val code: kotlin.String,
     val state: kotlin.String
 )
+{
+        fun validate() {
+            
+            
+        }
+}
 

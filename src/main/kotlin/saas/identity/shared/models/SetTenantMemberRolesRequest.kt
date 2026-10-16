@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param roleIds 
@@ -21,4 +22,11 @@ import kotlinx.serialization.Serializable
 data class SetTenantMemberRolesRequest(
     val roleIds: kotlin.collections.List<kotlin.String>
 )
+{
+        fun validate() {
+            roleIds.forEach {
+    }
+    
+        }
+}
 

@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.ClientMenusMoveSysMenuRequest
 import saas.identity.shared.models.CreateSysMenuRequest
@@ -34,190 +39,104 @@ import saas.identity.shared.models.UpdateSysMenuRequest
 
 fun Route.ClientMenusApi() {
     post<Paths.clientMenusCreateSysMenu> { clientMenusCreateSysMenu ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val clientMenusApiDelegate: ClientMenusApiDelegate? by call.delegates
+        val clientId = clientMenusCreateSysMenu.clientId
+        val createSysMenuRequest = call.receive<CreateSysMenuRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 createSysMenuRequest.validate()
+            
+        
+        val delegate = clientMenusApiDelegate ?: throw APINotImplementedException("API operation clientMenusCreateSysMenu has not been implemented yet.")
+        val result = delegate.clientMenusCreateSysMenu(clientId, createSysMenuRequest, call)
+        call.respond(result)
+        
         
     }
     delete<Paths.clientMenusDeleteSysMenu> { clientMenusDeleteSysMenu ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val clientMenusApiDelegate: ClientMenusApiDelegate? by call.delegates
+        val clientId = clientMenusDeleteSysMenu.clientId
+        val menuId = clientMenusDeleteSysMenu.menuId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = clientMenusApiDelegate ?: throw APINotImplementedException("API operation clientMenusDeleteSysMenu has not been implemented yet.")
+        val result = delegate.clientMenusDeleteSysMenu(clientId, menuId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.clientMenusGetSysMenu> { clientMenusGetSysMenu ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val clientMenusApiDelegate: ClientMenusApiDelegate? by call.delegates
+        val clientId = clientMenusGetSysMenu.clientId
+        val menuId = clientMenusGetSysMenu.menuId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = clientMenusApiDelegate ?: throw APINotImplementedException("API operation clientMenusGetSysMenu has not been implemented yet.")
+        val result = delegate.clientMenusGetSysMenu(clientId, menuId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.clientMenusListSysMenus> { clientMenusListSysMenus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """[ {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }, {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        } ]"""
+        val clientMenusApiDelegate: ClientMenusApiDelegate? by call.delegates
+        val clientId = clientMenusListSysMenus.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = clientMenusApiDelegate ?: throw APINotImplementedException("API operation clientMenusListSysMenus has not been implemented yet.")
+        val result = delegate.clientMenusListSysMenus(clientId, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.clientMenusMoveSysMenu> { clientMenusMoveSysMenu ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val clientMenusApiDelegate: ClientMenusApiDelegate? by call.delegates
+        val clientId = clientMenusMoveSysMenu.clientId
+        val menuId = clientMenusMoveSysMenu.menuId
+        val clientMenusMoveSysMenuRequest = call.receive<ClientMenusMoveSysMenuRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 clientMenusMoveSysMenuRequest.validate()
+            
+        
+        val delegate = clientMenusApiDelegate ?: throw APINotImplementedException("API operation clientMenusMoveSysMenu has not been implemented yet.")
+        val result = delegate.clientMenusMoveSysMenu(clientId, menuId, clientMenusMoveSysMenuRequest, call)
+        call.respond(result)
+        
         
     }
     put<Paths.clientMenusReorderSysMenus> { clientMenusReorderSysMenus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """[ {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }, {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        } ]"""
+        val clientMenusApiDelegate: ClientMenusApiDelegate? by call.delegates
+        val clientId = clientMenusReorderSysMenus.clientId
+        val menuId = clientMenusReorderSysMenus.menuId
+        val reorderSysMenuRequest = call.receive<ReorderSysMenuRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 reorderSysMenuRequest.validate()
+            
+        
+        val delegate = clientMenusApiDelegate ?: throw APINotImplementedException("API operation clientMenusReorderSysMenus has not been implemented yet.")
+        val result = delegate.clientMenusReorderSysMenus(clientId, menuId, reorderSysMenuRequest, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.clientMenusUpdateSysMenu> { clientMenusUpdateSysMenu ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "parentId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "title" : "title",
-          "type" : "directory",
-          "path" : "path",
-          "component" : "component",
-          "perms" : "perms",
-          "icon" : "icon",
-          "sortOrder" : 0,
-          "status" : 6,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val clientMenusApiDelegate: ClientMenusApiDelegate? by call.delegates
+        val clientId = clientMenusUpdateSysMenu.clientId
+        val menuId = clientMenusUpdateSysMenu.menuId
+        val updateSysMenuRequest = call.receive<UpdateSysMenuRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 updateSysMenuRequest.validate()
+            
+        
+        val delegate = clientMenusApiDelegate ?: throw APINotImplementedException("API operation clientMenusUpdateSysMenu has not been implemented yet.")
+        val result = delegate.clientMenusUpdateSysMenu(clientId, menuId, updateSysMenuRequest, call)
+        call.respond(result)
+        
         
     }
 }

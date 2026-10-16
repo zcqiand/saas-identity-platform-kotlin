@@ -14,6 +14,7 @@ package saas.identity.shared.models
 import saas.identity.shared.models.TenantMemberUserView
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param items 
@@ -28,4 +29,13 @@ data class TenantMembersListTenantUsers200Response(
     val pageSize: kotlin.Int,
     val total: kotlin.Long
 )
+{
+        fun validate() {
+            items.forEach { it.validate() }
+    
+            
+            
+            
+        }
+}
 

@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.AuthorizeCodeRequest
 import saas.identity.shared.models.ErrorResponse
@@ -33,37 +38,31 @@ import saas.identity.shared.models.TokenResponse
 
 fun Route.OauthApi() {
     post<Paths.oAuthAuthorize> { oAuthAuthorize ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "code",
-          "state" : "state"
-        }"""
+        val oauthApiDelegate: OauthApiDelegate? by call.delegates
+        val authorizeCodeRequest = call.receive<AuthorizeCodeRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 authorizeCodeRequest.validate()
+            
+        
+        val delegate = oauthApiDelegate ?: throw APINotImplementedException("API operation oAuthAuthorize has not been implemented yet.")
+        val result = delegate.oAuthAuthorize(authorizeCodeRequest, call)
+        call.respond(result)
+        
         
     }
     post<Paths.oAuthToken> { oAuthToken ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "accessToken" : "accessToken",
-          "refreshToken" : "refreshToken",
-          "tokenType" : "tokenType",
-          "expiresIn" : 0,
-          "scope" : "scope",
-          "userId" : "userId",
-          "clientId" : "clientId",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-        }"""
+        val oauthApiDelegate: OauthApiDelegate? by call.delegates
+        val tokenRequest = call.receive<TokenRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 tokenRequest.validate()
+            
+        
+        val delegate = oauthApiDelegate ?: throw APINotImplementedException("API operation oAuthToken has not been implemented yet.")
+        val result = delegate.oAuthToken(tokenRequest, call)
+        call.respond(result)
+        
         
     }
 }

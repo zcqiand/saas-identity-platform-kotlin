@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.CreateSysUserRequest
 import saas.identity.shared.models.ErrorResponse
@@ -38,188 +43,122 @@ import saas.identity.shared.models.UpdateSysUserRequest
 
 fun Route.TenantMembersApi() {
     put<Paths.tenantMembersAssignTenantMemberRoles> { tenantMembersAssignTenantMemberRoles ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "username" : "username",
-          "email" : "email",
-          "status" : "active",
-          "roleIds" : [ "roleIds", "roleIds" ],
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersAssignTenantMemberRoles.tenantId
+        val userId = tenantMembersAssignTenantMemberRoles.userId
+        val setTenantMemberRolesRequest = call.receive<SetTenantMemberRolesRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 setTenantMemberRolesRequest.validate()
+            
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersAssignTenantMemberRoles has not been implemented yet.")
+        val result = delegate.tenantMembersAssignTenantMemberRoles(tenantId, userId, setTenantMemberRolesRequest, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.tenantMembersChangeTenantUserStatus> { tenantMembersChangeTenantUserStatus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "username" : "username",
-          "email" : "email",
-          "status" : "active",
-          "roleIds" : [ "roleIds", "roleIds" ],
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersChangeTenantUserStatus.tenantId
+        val userId = tenantMembersChangeTenantUserStatus.userId
+        val tenantMembersChangeTenantUserStatusRequest = call.receive<TenantMembersChangeTenantUserStatusRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 tenantMembersChangeTenantUserStatusRequest.validate()
+            
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersChangeTenantUserStatus has not been implemented yet.")
+        val result = delegate.tenantMembersChangeTenantUserStatus(tenantId, userId, tenantMembersChangeTenantUserStatusRequest, call)
+        call.respond(result)
+        
         
     }
     post<Paths.tenantMembersCreateTenantUser> { tenantMembersCreateTenantUser ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "username" : "username",
-          "email" : "email",
-          "status" : "active",
-          "roleIds" : [ "roleIds", "roleIds" ],
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersCreateTenantUser.tenantId
+        val createSysUserRequest = call.receive<CreateSysUserRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 createSysUserRequest.validate()
+            
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersCreateTenantUser has not been implemented yet.")
+        val result = delegate.tenantMembersCreateTenantUser(tenantId, createSysUserRequest, call)
+        call.respond(result)
+        
         
     }
     delete<Paths.tenantMembersDeleteTenantUser> { tenantMembersDeleteTenantUser ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersDeleteTenantUser.tenantId
+        val userId = tenantMembersDeleteTenantUser.userId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersDeleteTenantUser has not been implemented yet.")
+        val result = delegate.tenantMembersDeleteTenantUser(tenantId, userId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.tenantMembersGetTenantUser> { tenantMembersGetTenantUser ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "username" : "username",
-          "email" : "email",
-          "status" : "active",
-          "roleIds" : [ "roleIds", "roleIds" ],
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersGetTenantUser.tenantId
+        val userId = tenantMembersGetTenantUser.userId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersGetTenantUser has not been implemented yet.")
+        val result = delegate.tenantMembersGetTenantUser(tenantId, userId, call)
+        call.respond(result)
+        
         
     }
     post<Paths.tenantMembersInviteTenantUser> { tenantMembersInviteTenantUser ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "member" : {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "userId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "memberName" : "memberName",
-            "isOwner" : true,
-            "status" : "active",
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          },
-          "user" : {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "username" : "username",
-            "email" : "email",
-            "mobile" : "mobile",
-            "status" : "active",
-            "failedAttempts" : 0,
-            "lockedUntil" : "2000-01-23T04:56:07.000+00:00",
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          },
-          "roles" : [ "roles", "roles" ]
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersInviteTenantUser.tenantId
+        val tenantMembersInviteTenantUserRequest = call.receive<TenantMembersInviteTenantUserRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 tenantMembersInviteTenantUserRequest.validate()
+            
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersInviteTenantUser has not been implemented yet.")
+        val result = delegate.tenantMembersInviteTenantUser(tenantId, tenantMembersInviteTenantUserRequest, call)
+        call.respond(result)
+        
         
     }
     get<Paths.tenantMembersListTenantUsers> { tenantMembersListTenantUsers ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "items" : [ {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "username" : "username",
-            "email" : "email",
-            "status" : "active",
-            "roleIds" : [ "roleIds", "roleIds" ],
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          }, {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "username" : "username",
-            "email" : "email",
-            "status" : "active",
-            "roleIds" : [ "roleIds", "roleIds" ],
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          } ],
-          "page" : 0,
-          "pageSize" : 20,
-          "total" : 0
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersListTenantUsers.tenantId
+        val page = tenantMembersListTenantUsers.page
+        val pageSize = tenantMembersListTenantUsers.pageSize
+        val status = tenantMembersListTenantUsers.status
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersListTenantUsers has not been implemented yet.")
+        val result = delegate.tenantMembersListTenantUsers(tenantId, page, pageSize, status, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.tenantMembersUpdateTenantUser> { tenantMembersUpdateTenantUser ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "username" : "username",
-          "email" : "email",
-          "status" : "active",
-          "roleIds" : [ "roleIds", "roleIds" ],
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantMembersApiDelegate: TenantMembersApiDelegate? by call.delegates
+        val tenantId = tenantMembersUpdateTenantUser.tenantId
+        val userId = tenantMembersUpdateTenantUser.userId
+        val updateSysUserRequest = call.receive<UpdateSysUserRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 updateSysUserRequest.validate()
+            
+        
+        val delegate = tenantMembersApiDelegate ?: throw APINotImplementedException("API operation tenantMembersUpdateTenantUser has not been implemented yet.")
+        val result = delegate.tenantMembersUpdateTenantUser(tenantId, userId, updateSysUserRequest, call)
+        call.respond(result)
+        
         
     }
 }

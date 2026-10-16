@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.CurrentUser
 import saas.identity.shared.models.EffectiveMenuNode
@@ -33,91 +38,51 @@ import saas.identity.shared.models.TenantMembership
 
 fun Route.MeApi() {
     get<Paths.meGetMyMenus> { meGetMyMenus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val meApiDelegate: MeApiDelegate? by call.delegates
+        val clientId = meGetMyMenus.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = meApiDelegate ?: throw APINotImplementedException("API operation meGetMyMenus has not been implemented yet.")
+        val result = delegate.meGetMyMenus(clientId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.meListMyTenants> { meListMyTenants ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """[ {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "userId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "roleIds" : [ "roleIds", "roleIds" ],
-          "status" : "active",
-          "joinedAt" : "2000-01-23T04:56:07.000+00:00"
-        }, {
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "userId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "roleIds" : [ "roleIds", "roleIds" ],
-          "status" : "active",
-          "joinedAt" : "2000-01-23T04:56:07.000+00:00"
-        } ]"""
+        val meApiDelegate: MeApiDelegate? by call.delegates
+        val clientId = meListMyTenants.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = meApiDelegate ?: throw APINotImplementedException("API operation meListMyTenants has not been implemented yet.")
+        val result = delegate.meListMyTenants(clientId, call)
+        call.respond(result)
+        
         
     }
     post<Paths.meSwitchTenant> { meSwitchTenant ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "accessToken" : "accessToken",
-          "refreshToken" : "refreshToken",
-          "expiresAt" : "2000-01-23T04:56:07.000+00:00",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-        }"""
+        val meApiDelegate: MeApiDelegate? by call.delegates
+        val tenantId = meSwitchTenant.tenantId
+        val clientId = meSwitchTenant.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = meApiDelegate ?: throw APINotImplementedException("API operation meSwitchTenant has not been implemented yet.")
+        val result = delegate.meSwitchTenant(tenantId, clientId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.meWhoami> { meWhoami ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "email" : "email",
-          "memberships" : [ {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "userId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "roleIds" : [ "roleIds", "roleIds" ],
-            "status" : "active",
-            "joinedAt" : "2000-01-23T04:56:07.000+00:00"
-          }, {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "userId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "roleIds" : [ "roleIds", "roleIds" ],
-            "status" : "active",
-            "joinedAt" : "2000-01-23T04:56:07.000+00:00"
-          } ],
-          "currentTenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91"
-        }"""
+        val meApiDelegate: MeApiDelegate? by call.delegates
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = meApiDelegate ?: throw APINotImplementedException("API operation meWhoami has not been implemented yet.")
+        val result = delegate.meWhoami(call)
+        call.respond(result)
+        
         
     }
 }

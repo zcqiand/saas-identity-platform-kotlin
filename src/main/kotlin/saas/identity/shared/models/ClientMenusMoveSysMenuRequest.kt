@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param parentId 
@@ -21,4 +22,9 @@ import kotlinx.serialization.Serializable
 data class ClientMenusMoveSysMenuRequest(
     val parentId: kotlin.String? = null
 )
+{
+        fun validate() {
+            
+        }
+}
 

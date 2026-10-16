@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param id 
@@ -39,4 +40,74 @@ data class SysRole(
     val updatedAt: kotlin.String,
     val description: kotlin.String? = null
 )
+{
+        fun validate() {
+            try {
+        kotlin.uuid.Uuid.parse(id.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property id should be a valid UUID",
+            parameterName = "id",
+            validationType = "uuid",
+            actualValue = id
+        )
+    }
+    
+            try {
+        kotlin.uuid.Uuid.parse(tenantId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property tenantId should be a valid UUID",
+            parameterName = "tenantId",
+            validationType = "uuid",
+            actualValue = tenantId
+        )
+    }
+    
+            
+            if ((roleCode).length < 1) {
+        throw BadParameterException(
+            message = "Property roleCode length should be >= 1",
+            parameterName = "roleCode",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (roleCode).length
+        )
+    }
+    if ((roleCode).length > 64) {
+        throw BadParameterException(
+            message = "Property roleCode length should be <= 64",
+            parameterName = "roleCode",
+            validationType = "maxLength",
+            expectedValue = 64,
+            actualValue = (roleCode).length
+        )
+    }
+    
+            if ((roleName).length < 1) {
+        throw BadParameterException(
+            message = "Property roleName length should be >= 1",
+            parameterName = "roleName",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (roleName).length
+        )
+    }
+    if ((roleName).length > 64) {
+        throw BadParameterException(
+            message = "Property roleName length should be <= 64",
+            parameterName = "roleName",
+            validationType = "maxLength",
+            expectedValue = 64,
+            actualValue = (roleName).length
+        )
+    }
+    
+            
+            
+            
+            
+            
+        }
+}
 

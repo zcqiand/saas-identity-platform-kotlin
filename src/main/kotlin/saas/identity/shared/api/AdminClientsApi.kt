@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.AdminClientsListClients200Response
 import saas.identity.shared.models.AdminClientsSetClientStatusRequest
@@ -34,158 +39,84 @@ import saas.identity.shared.models.UpdateOAuthClientRequest
 
 fun Route.AdminClientsApi() {
     post<Paths.adminClientsCreateClient> { adminClientsCreateClient ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "clientName" : "clientName",
-          "grantTypes" : "grantTypes",
-          "redirectUris" : "redirectUris",
-          "scopes" : "scopes",
-          "accessTokenValidity" : 0,
-          "refreshTokenValidity" : 6,
-          "autoApprove" : true,
-          "status" : 1,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val adminClientsApiDelegate: AdminClientsApiDelegate? by call.delegates
+        val createOAuthClientRequest = call.receive<CreateOAuthClientRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 createOAuthClientRequest.validate()
+            
+        
+        val delegate = adminClientsApiDelegate ?: throw APINotImplementedException("API operation adminClientsCreateClient has not been implemented yet.")
+        val result = delegate.adminClientsCreateClient(createOAuthClientRequest, call)
+        call.respond(result)
+        
         
     }
     delete<Paths.adminClientsDeleteClient> { adminClientsDeleteClient ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val adminClientsApiDelegate: AdminClientsApiDelegate? by call.delegates
+        val clientId = adminClientsDeleteClient.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = adminClientsApiDelegate ?: throw APINotImplementedException("API operation adminClientsDeleteClient has not been implemented yet.")
+        val result = delegate.adminClientsDeleteClient(clientId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.adminClientsGetClient> { adminClientsGetClient ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "clientName" : "clientName",
-          "grantTypes" : "grantTypes",
-          "redirectUris" : "redirectUris",
-          "scopes" : "scopes",
-          "accessTokenValidity" : 0,
-          "refreshTokenValidity" : 6,
-          "autoApprove" : true,
-          "status" : 1,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val adminClientsApiDelegate: AdminClientsApiDelegate? by call.delegates
+        val clientId = adminClientsGetClient.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = adminClientsApiDelegate ?: throw APINotImplementedException("API operation adminClientsGetClient has not been implemented yet.")
+        val result = delegate.adminClientsGetClient(clientId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.adminClientsListClients> { adminClientsListClients ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "items" : [ {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "clientId" : "clientId",
-            "clientName" : "clientName",
-            "grantTypes" : "grantTypes",
-            "redirectUris" : "redirectUris",
-            "scopes" : "scopes",
-            "accessTokenValidity" : 0,
-            "refreshTokenValidity" : 6,
-            "autoApprove" : true,
-            "status" : 1,
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          }, {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "clientId" : "clientId",
-            "clientName" : "clientName",
-            "grantTypes" : "grantTypes",
-            "redirectUris" : "redirectUris",
-            "scopes" : "scopes",
-            "accessTokenValidity" : 0,
-            "refreshTokenValidity" : 6,
-            "autoApprove" : true,
-            "status" : 1,
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          } ],
-          "page" : 0,
-          "pageSize" : 20,
-          "total" : 0
-        }"""
+        val adminClientsApiDelegate: AdminClientsApiDelegate? by call.delegates
+        val page = adminClientsListClients.page
+        val pageSize = adminClientsListClients.pageSize
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = adminClientsApiDelegate ?: throw APINotImplementedException("API operation adminClientsListClients has not been implemented yet.")
+        val result = delegate.adminClientsListClients(page, pageSize, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.adminClientsSetClientStatus> { adminClientsSetClientStatus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "clientName" : "clientName",
-          "grantTypes" : "grantTypes",
-          "redirectUris" : "redirectUris",
-          "scopes" : "scopes",
-          "accessTokenValidity" : 0,
-          "refreshTokenValidity" : 6,
-          "autoApprove" : true,
-          "status" : 1,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val adminClientsApiDelegate: AdminClientsApiDelegate? by call.delegates
+        val clientId = adminClientsSetClientStatus.clientId
+        val adminClientsSetClientStatusRequest = call.receive<AdminClientsSetClientStatusRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 adminClientsSetClientStatusRequest.validate()
+            
+        
+        val delegate = adminClientsApiDelegate ?: throw APINotImplementedException("API operation adminClientsSetClientStatus has not been implemented yet.")
+        val result = delegate.adminClientsSetClientStatus(clientId, adminClientsSetClientStatusRequest, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.adminClientsUpdateClient> { adminClientsUpdateClient ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "clientName" : "clientName",
-          "grantTypes" : "grantTypes",
-          "redirectUris" : "redirectUris",
-          "scopes" : "scopes",
-          "accessTokenValidity" : 0,
-          "refreshTokenValidity" : 6,
-          "autoApprove" : true,
-          "status" : 1,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val adminClientsApiDelegate: AdminClientsApiDelegate? by call.delegates
+        val clientId = adminClientsUpdateClient.clientId
+        val updateOAuthClientRequest = call.receive<UpdateOAuthClientRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 updateOAuthClientRequest.validate()
+            
+        
+        val delegate = adminClientsApiDelegate ?: throw APINotImplementedException("API operation adminClientsUpdateClient has not been implemented yet.")
+        val result = delegate.adminClientsUpdateClient(clientId, updateOAuthClientRequest, call)
+        call.respond(result)
+        
         
     }
 }

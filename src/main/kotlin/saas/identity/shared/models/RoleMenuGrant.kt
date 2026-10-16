@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param roleId 
@@ -27,4 +28,34 @@ data class RoleMenuGrant(
     val menuIds: kotlin.collections.List<kotlin.String>,
     val updatedAt: kotlin.String
 )
+{
+        fun validate() {
+            try {
+        kotlin.uuid.Uuid.parse(roleId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property roleId should be a valid UUID",
+            parameterName = "roleId",
+            validationType = "uuid",
+            actualValue = roleId
+        )
+    }
+    
+            try {
+        kotlin.uuid.Uuid.parse(tenantId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property tenantId should be a valid UUID",
+            parameterName = "tenantId",
+            validationType = "uuid",
+            actualValue = tenantId
+        )
+    }
+    
+            menuIds.forEach {
+    }
+    
+            
+        }
+}
 

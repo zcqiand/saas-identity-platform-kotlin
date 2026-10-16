@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param id 
@@ -31,4 +32,34 @@ data class TenantApplication(
     val createdAt: kotlin.String,
     val expireTime: kotlin.String? = null
 )
+{
+        fun validate() {
+            try {
+        kotlin.uuid.Uuid.parse(id.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property id should be a valid UUID",
+            parameterName = "id",
+            validationType = "uuid",
+            actualValue = id
+        )
+    }
+    
+            try {
+        kotlin.uuid.Uuid.parse(tenantId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property tenantId should be a valid UUID",
+            parameterName = "tenantId",
+            validationType = "uuid",
+            actualValue = tenantId
+        )
+    }
+    
+            
+            
+            
+            
+        }
+}
 

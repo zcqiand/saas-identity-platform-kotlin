@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param clientId 
@@ -25,4 +26,11 @@ data class OAuthClientPublicInfo(
     val clientName: kotlin.String,
     val status: kotlin.Int
 )
+{
+        fun validate() {
+            
+            
+            
+        }
+}
 

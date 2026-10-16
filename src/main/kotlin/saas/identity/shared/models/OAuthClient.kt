@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param id 
@@ -43,4 +44,30 @@ data class OAuthClient(
     val updatedAt: kotlin.String,
     val scopes: kotlin.String? = null
 )
+{
+        fun validate() {
+            try {
+        kotlin.uuid.Uuid.parse(id.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property id should be a valid UUID",
+            parameterName = "id",
+            validationType = "uuid",
+            actualValue = id
+        )
+    }
+    
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        }
+}
 

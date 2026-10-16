@@ -14,6 +14,7 @@ package saas.identity.shared.models
 import saas.identity.shared.models.TenantMemberStatus
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param id 
@@ -36,4 +37,64 @@ data class TenantMemberUserView(
     val updatedAt: kotlin.String,
     val email: kotlin.String? = null
 )
+{
+        fun validate() {
+            try {
+        kotlin.uuid.Uuid.parse(id.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property id should be a valid UUID",
+            parameterName = "id",
+            validationType = "uuid",
+            actualValue = id
+        )
+    }
+    
+            try {
+        kotlin.uuid.Uuid.parse(tenantId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property tenantId should be a valid UUID",
+            parameterName = "tenantId",
+            validationType = "uuid",
+            actualValue = tenantId
+        )
+    }
+    
+            if ((username).length < 1) {
+        throw BadParameterException(
+            message = "Property username length should be >= 1",
+            parameterName = "username",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (username).length
+        )
+    }
+    if ((username).length > 64) {
+        throw BadParameterException(
+            message = "Property username length should be <= 64",
+            parameterName = "username",
+            validationType = "maxLength",
+            expectedValue = 64,
+            actualValue = (username).length
+        )
+    }
+    
+            
+            roleIds.forEach {
+    }
+    
+            
+            
+            if (!"^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$".toRegex().matches(email.toString())) {
+        throw BadParameterException(
+            message = "Property email should be a valid email",
+            parameterName = "email",
+            validationType = "email",
+            actualValue = email
+        )
+    }
+    
+        }
+}
 

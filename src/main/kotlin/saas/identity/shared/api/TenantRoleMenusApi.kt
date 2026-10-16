@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.ErrorResponse
 import saas.identity.shared.models.RoleMenuGrant
@@ -31,52 +36,48 @@ import saas.identity.shared.models.SetSysRoleMenusRequest
 
 fun Route.TenantRoleMenusApi() {
     delete<Paths.tenantRoleMenusClearSysRoleMenus> { tenantRoleMenusClearSysRoleMenus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val tenantRoleMenusApiDelegate: TenantRoleMenusApiDelegate? by call.delegates
+        val tenantId = tenantRoleMenusClearSysRoleMenus.tenantId
+        val roleId = tenantRoleMenusClearSysRoleMenus.roleId
+        val clientId = tenantRoleMenusClearSysRoleMenus.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantRoleMenusApiDelegate ?: throw APINotImplementedException("API operation tenantRoleMenusClearSysRoleMenus has not been implemented yet.")
+        val result = delegate.tenantRoleMenusClearSysRoleMenus(tenantId, roleId, clientId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.tenantRoleMenusListSysRoleMenus> { tenantRoleMenusListSysRoleMenus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "roleId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "menuIds" : [ "menuIds", "menuIds" ],
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantRoleMenusApiDelegate: TenantRoleMenusApiDelegate? by call.delegates
+        val tenantId = tenantRoleMenusListSysRoleMenus.tenantId
+        val roleId = tenantRoleMenusListSysRoleMenus.roleId
+        val clientId = tenantRoleMenusListSysRoleMenus.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantRoleMenusApiDelegate ?: throw APINotImplementedException("API operation tenantRoleMenusListSysRoleMenus has not been implemented yet.")
+        val result = delegate.tenantRoleMenusListSysRoleMenus(tenantId, roleId, clientId, call)
+        call.respond(result)
+        
         
     }
     put<Paths.tenantRoleMenusSetSysRoleMenus> { tenantRoleMenusSetSysRoleMenus ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "roleId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "menuIds" : [ "menuIds", "menuIds" ],
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantRoleMenusApiDelegate: TenantRoleMenusApiDelegate? by call.delegates
+        val tenantId = tenantRoleMenusSetSysRoleMenus.tenantId
+        val roleId = tenantRoleMenusSetSysRoleMenus.roleId
+        val setSysRoleMenusRequest = call.receive<SetSysRoleMenusRequest>()
+        val clientId = tenantRoleMenusSetSysRoleMenus.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 setSysRoleMenusRequest.validate()
+            
+        
+        val delegate = tenantRoleMenusApiDelegate ?: throw APINotImplementedException("API operation tenantRoleMenusSetSysRoleMenus has not been implemented yet.")
+        val result = delegate.tenantRoleMenusSetSysRoleMenus(tenantId, roleId, setSysRoleMenusRequest, clientId, call)
+        call.respond(result)
+        
         
     }
 }

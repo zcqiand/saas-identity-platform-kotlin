@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param grantType 
@@ -40,5 +41,13 @@ data class TokenRequest(
         authorization_code("authorization_code"),
         refresh_token("refresh_token");
     }
+        fun validate() {
+            
+            
+            
+            
+            
+            
+        }
 }
 

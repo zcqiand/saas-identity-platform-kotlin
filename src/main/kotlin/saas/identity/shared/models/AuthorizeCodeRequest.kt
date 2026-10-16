@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param clientId 
@@ -37,5 +38,30 @@ data class AuthorizeCodeRequest(
     enum class ResponseType(val value: kotlin.String){
         code("code");
     }
+        fun validate() {
+            
+            if ((redirectUri).length < 1) {
+        throw BadParameterException(
+            message = "Property redirectUri length should be >= 1",
+            parameterName = "redirectUri",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (redirectUri).length
+        )
+    }
+    if ((redirectUri).length > 500) {
+        throw BadParameterException(
+            message = "Property redirectUri length should be <= 500",
+            parameterName = "redirectUri",
+            validationType = "maxLength",
+            expectedValue = 500,
+            actualValue = (redirectUri).length
+        )
+    }
+    
+            
+            
+            
+        }
 }
 

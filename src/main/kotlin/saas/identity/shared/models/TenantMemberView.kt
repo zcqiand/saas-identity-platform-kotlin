@@ -15,6 +15,7 @@ import saas.identity.shared.models.SysUser
 import saas.identity.shared.models.TenantMember
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param member 
@@ -27,4 +28,15 @@ data class TenantMemberView(
     val user: SysUser,
     val roles: kotlin.collections.List<kotlin.String>
 )
+{
+        fun validate() {
+            member.validate()
+    
+            user.validate()
+    
+            roles.forEach {
+    }
+    
+        }
+}
 

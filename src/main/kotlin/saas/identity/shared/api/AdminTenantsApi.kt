@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.AdminTenantsListTenants200Response
 import saas.identity.shared.models.CreateTenantRequest
@@ -33,104 +38,69 @@ import saas.identity.shared.models.UpdateTenantRequest
 
 fun Route.AdminTenantsApi() {
     post<Paths.adminTenantsCreateTenant> { adminTenantsCreateTenant ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantKey" : "tenantKey",
-          "name" : "name",
-          "status" : "active",
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val adminTenantsApiDelegate: AdminTenantsApiDelegate? by call.delegates
+        val createTenantRequest = call.receive<CreateTenantRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 createTenantRequest.validate()
+            
+        
+        val delegate = adminTenantsApiDelegate ?: throw APINotImplementedException("API operation adminTenantsCreateTenant has not been implemented yet.")
+        val result = delegate.adminTenantsCreateTenant(createTenantRequest, call)
+        call.respond(result)
+        
         
     }
     delete<Paths.adminTenantsDeleteTenant> { adminTenantsDeleteTenant ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val adminTenantsApiDelegate: AdminTenantsApiDelegate? by call.delegates
+        val id = adminTenantsDeleteTenant.id
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = adminTenantsApiDelegate ?: throw APINotImplementedException("API operation adminTenantsDeleteTenant has not been implemented yet.")
+        val result = delegate.adminTenantsDeleteTenant(id, call)
+        call.respond(result)
+        
         
     }
     get<Paths.adminTenantsGetTenant> { adminTenantsGetTenant ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantKey" : "tenantKey",
-          "name" : "name",
-          "status" : "active",
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val adminTenantsApiDelegate: AdminTenantsApiDelegate? by call.delegates
+        val id = adminTenantsGetTenant.id
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = adminTenantsApiDelegate ?: throw APINotImplementedException("API operation adminTenantsGetTenant has not been implemented yet.")
+        val result = delegate.adminTenantsGetTenant(id, call)
+        call.respond(result)
+        
         
     }
     get<Paths.adminTenantsListTenants> { adminTenantsListTenants ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "items" : [ {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantKey" : "tenantKey",
-            "name" : "name",
-            "status" : "active",
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          }, {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantKey" : "tenantKey",
-            "name" : "name",
-            "status" : "active",
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          } ],
-          "page" : 0,
-          "pageSize" : 20,
-          "total" : 0
-        }"""
+        val adminTenantsApiDelegate: AdminTenantsApiDelegate? by call.delegates
+        val page = adminTenantsListTenants.page
+        val pageSize = adminTenantsListTenants.pageSize
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = adminTenantsApiDelegate ?: throw APINotImplementedException("API operation adminTenantsListTenants has not been implemented yet.")
+        val result = delegate.adminTenantsListTenants(page, pageSize, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.adminTenantsUpdateTenant> { adminTenantsUpdateTenant ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantKey" : "tenantKey",
-          "name" : "name",
-          "status" : "active",
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val adminTenantsApiDelegate: AdminTenantsApiDelegate? by call.delegates
+        val id = adminTenantsUpdateTenant.id
+        val updateTenantRequest = call.receive<UpdateTenantRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 updateTenantRequest.validate()
+            
+        
+        val delegate = adminTenantsApiDelegate ?: throw APINotImplementedException("API operation adminTenantsUpdateTenant has not been implemented yet.")
+        val result = delegate.adminTenantsUpdateTenant(id, updateTenantRequest, call)
+        call.respond(result)
+        
         
     }
 }

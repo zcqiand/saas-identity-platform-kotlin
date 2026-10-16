@@ -24,24 +24,26 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.ErrorResponse
 import saas.identity.shared.models.OAuthClientPublicInfo
 
 fun Route.ClientsApi() {
     get<Paths.clientsGetClient> { clientsGetClient ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "clientId" : "clientId",
-          "clientName" : "clientName",
-          "status" : 0
-        }"""
+        val clientsApiDelegate: ClientsApiDelegate? by call.delegates
+        val clientId = clientsGetClient.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = clientsApiDelegate ?: throw APINotImplementedException("API operation clientsGetClient has not been implemented yet.")
+        val result = delegate.clientsGetClient(clientId, call)
+        call.respond(result)
+        
         
     }
 }

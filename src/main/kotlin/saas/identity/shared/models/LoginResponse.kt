@@ -15,6 +15,7 @@ import saas.identity.shared.models.SysUser
 import saas.identity.shared.models.TenantMembership
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param user 
@@ -39,4 +40,39 @@ data class LoginResponse(
     val tokenType: kotlin.String? = null,
     val expiresIn: kotlin.Int? = null
 )
+{
+        fun validate() {
+            user.validate()
+    
+            availableTenants.forEach { it.validate() }
+    
+            try {
+        kotlin.uuid.Uuid.parse(userId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property userId should be a valid UUID",
+            parameterName = "userId",
+            validationType = "uuid",
+            actualValue = userId
+        )
+    }
+    
+            
+            try {
+        kotlin.uuid.Uuid.parse(currentTenantId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property currentTenantId should be a valid UUID",
+            parameterName = "currentTenantId",
+            validationType = "uuid",
+            actualValue = currentTenantId
+        )
+    }
+    
+            
+            
+            
+            
+        }
+}
 

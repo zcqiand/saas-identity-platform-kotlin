@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param code 
@@ -25,4 +26,13 @@ data class ErrorResponse(
     val message: kotlin.String,
     val details: kotlin.collections.Map<kotlin.String, kotlinx.serialization.json.JsonElement>? = null
 )
+{
+        fun validate() {
+            
+            
+            details?.forEach { (key, value) ->
+    }
+    
+        }
+}
 

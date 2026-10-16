@@ -15,6 +15,7 @@ import saas.identity.shared.models.ErrorResponse
 import saas.identity.shared.models.LockedAccountResponse
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param code 
@@ -31,4 +32,15 @@ data class SessionsLoginDefaultResponse(
     val remainingAttempts: kotlin.Int? = null,
     val details: kotlin.collections.Map<kotlin.String, kotlinx.serialization.json.JsonElement>? = null
 )
+{
+        fun validate() {
+            
+            
+            
+            
+            details?.forEach { (key, value) ->
+    }
+    
+        }
+}
 

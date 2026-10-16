@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.CreateSysRoleRequest
 import saas.identity.shared.models.ErrorResponse
@@ -33,124 +38,75 @@ import saas.identity.shared.models.UpdateSysRoleRequest
 
 fun Route.TenantRolesApi() {
     post<Paths.tenantRolesCreateSysRole> { tenantRolesCreateSysRole ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "roleCode" : "roleCode",
-          "roleName" : "roleName",
-          "description" : "description",
-          "isPreset" : true,
-          "status" : 0,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantRolesApiDelegate: TenantRolesApiDelegate? by call.delegates
+        val tenantId = tenantRolesCreateSysRole.tenantId
+        val createSysRoleRequest = call.receive<CreateSysRoleRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 createSysRoleRequest.validate()
+            
+        
+        val delegate = tenantRolesApiDelegate ?: throw APINotImplementedException("API operation tenantRolesCreateSysRole has not been implemented yet.")
+        val result = delegate.tenantRolesCreateSysRole(tenantId, createSysRoleRequest, call)
+        call.respond(result)
+        
         
     }
     delete<Paths.tenantRolesDeleteSysRole> { tenantRolesDeleteSysRole ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val tenantRolesApiDelegate: TenantRolesApiDelegate? by call.delegates
+        val tenantId = tenantRolesDeleteSysRole.tenantId
+        val roleId = tenantRolesDeleteSysRole.roleId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantRolesApiDelegate ?: throw APINotImplementedException("API operation tenantRolesDeleteSysRole has not been implemented yet.")
+        val result = delegate.tenantRolesDeleteSysRole(tenantId, roleId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.tenantRolesGetSysRole> { tenantRolesGetSysRole ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "roleCode" : "roleCode",
-          "roleName" : "roleName",
-          "description" : "description",
-          "isPreset" : true,
-          "status" : 0,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantRolesApiDelegate: TenantRolesApiDelegate? by call.delegates
+        val tenantId = tenantRolesGetSysRole.tenantId
+        val roleId = tenantRolesGetSysRole.roleId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantRolesApiDelegate ?: throw APINotImplementedException("API operation tenantRolesGetSysRole has not been implemented yet.")
+        val result = delegate.tenantRolesGetSysRole(tenantId, roleId, call)
+        call.respond(result)
+        
         
     }
     get<Paths.tenantRolesListSysRoles> { tenantRolesListSysRoles ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "items" : [ {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "clientId" : "clientId",
-            "roleCode" : "roleCode",
-            "roleName" : "roleName",
-            "description" : "description",
-            "isPreset" : true,
-            "status" : 0,
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          }, {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "clientId" : "clientId",
-            "roleCode" : "roleCode",
-            "roleName" : "roleName",
-            "description" : "description",
-            "isPreset" : true,
-            "status" : 0,
-            "createdAt" : "2000-01-23T04:56:07.000+00:00",
-            "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-          } ],
-          "page" : 0,
-          "pageSize" : 20,
-          "total" : 0
-        }"""
+        val tenantRolesApiDelegate: TenantRolesApiDelegate? by call.delegates
+        val tenantId = tenantRolesListSysRoles.tenantId
+        val clientId = tenantRolesListSysRoles.clientId
+        val page = tenantRolesListSysRoles.page
+        val pageSize = tenantRolesListSysRoles.pageSize
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantRolesApiDelegate ?: throw APINotImplementedException("API operation tenantRolesListSysRoles has not been implemented yet.")
+        val result = delegate.tenantRolesListSysRoles(tenantId, clientId, page, pageSize, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.tenantRolesUpdateSysRole> { tenantRolesUpdateSysRole ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "roleCode" : "roleCode",
-          "roleName" : "roleName",
-          "description" : "description",
-          "isPreset" : true,
-          "status" : 0,
-          "createdAt" : "2000-01-23T04:56:07.000+00:00",
-          "updatedAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantRolesApiDelegate: TenantRolesApiDelegate? by call.delegates
+        val tenantId = tenantRolesUpdateSysRole.tenantId
+        val roleId = tenantRolesUpdateSysRole.roleId
+        val updateSysRoleRequest = call.receive<UpdateSysRoleRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 updateSysRoleRequest.validate()
+            
+        
+        val delegate = tenantRolesApiDelegate ?: throw APINotImplementedException("API operation tenantRolesUpdateSysRole has not been implemented yet.")
+        val result = delegate.tenantRolesUpdateSysRole(tenantId, roleId, updateSysRoleRequest, call)
+        call.respond(result)
+        
         
     }
 }

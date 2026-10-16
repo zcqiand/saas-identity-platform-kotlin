@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param orderedMenuIds 
@@ -21,4 +22,11 @@ import kotlinx.serialization.Serializable
 data class ReorderSysMenuRequest(
     val orderedMenuIds: kotlin.collections.List<kotlin.String>
 )
+{
+        fun validate() {
+            orderedMenuIds.forEach {
+    }
+    
+        }
+}
 

@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param clientId 
@@ -23,4 +24,10 @@ data class SubscribeTenantApplicationRequest(
     val clientId: kotlin.String,
     val expireTime: kotlin.String? = null
 )
+{
+        fun validate() {
+            
+            
+        }
+}
 

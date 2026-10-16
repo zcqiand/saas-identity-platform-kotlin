@@ -24,6 +24,11 @@ import io.ktor.server.resources.delete
 import io.ktor.server.resources.head
 import io.ktor.server.resources.patch
 import io.ktor.server.routing.*
+import io.ktor.server.request.*
+import io.ktor.http.content.*
+import saas.identity.shared.infrastructure.delegates
+import saas.identity.shared.infrastructure.BadParameterException
+import saas.identity.shared.infrastructure.APINotImplementedException
 import saas.identity.shared.infrastructure.ApiPrincipal
 import saas.identity.shared.models.ErrorResponse
 import saas.identity.shared.models.SubscribeTenantApplicationRequest
@@ -33,86 +38,61 @@ import saas.identity.shared.models.UpdateTenantApplicationRequest
 
 fun Route.TenantApplicationsApi() {
     get<Paths.tenantApplicationsListTenantApplications> { tenantApplicationsListTenantApplications ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "items" : [ {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "clientId" : "clientId",
-            "status" : 0,
-            "expireTime" : "2000-01-23T04:56:07.000+00:00",
-            "createdAt" : "2000-01-23T04:56:07.000+00:00"
-          }, {
-            "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-            "clientId" : "clientId",
-            "status" : 0,
-            "expireTime" : "2000-01-23T04:56:07.000+00:00",
-            "createdAt" : "2000-01-23T04:56:07.000+00:00"
-          } ],
-          "page" : 0,
-          "pageSize" : 20,
-          "total" : 0
-        }"""
+        val tenantApplicationsApiDelegate: TenantApplicationsApiDelegate? by call.delegates
+        val tenantId = tenantApplicationsListTenantApplications.tenantId
+        val page = tenantApplicationsListTenantApplications.page
+        val pageSize = tenantApplicationsListTenantApplications.pageSize
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantApplicationsApiDelegate ?: throw APINotImplementedException("API operation tenantApplicationsListTenantApplications has not been implemented yet.")
+        val result = delegate.tenantApplicationsListTenantApplications(tenantId, page, pageSize, call)
+        call.respond(result)
+        
         
     }
     delete<Paths.tenantApplicationsRemoveTenantApplication> { tenantApplicationsRemoveTenantApplication ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "code" : "BAD_REQUEST",
-          "message" : "message",
-          "details" : {
-            "key" : ""
-          }
-        }"""
+        val tenantApplicationsApiDelegate: TenantApplicationsApiDelegate? by call.delegates
+        val tenantId = tenantApplicationsRemoveTenantApplication.tenantId
+        val clientId = tenantApplicationsRemoveTenantApplication.clientId
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+        
+        val delegate = tenantApplicationsApiDelegate ?: throw APINotImplementedException("API operation tenantApplicationsRemoveTenantApplication has not been implemented yet.")
+        val result = delegate.tenantApplicationsRemoveTenantApplication(tenantId, clientId, call)
+        call.respond(result)
+        
         
     }
     post<Paths.tenantApplicationsSubscribeTenantApplication> { tenantApplicationsSubscribeTenantApplication ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "status" : 0,
-          "expireTime" : "2000-01-23T04:56:07.000+00:00",
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantApplicationsApiDelegate: TenantApplicationsApiDelegate? by call.delegates
+        val tenantId = tenantApplicationsSubscribeTenantApplication.tenantId
+        val subscribeTenantApplicationRequest = call.receive<SubscribeTenantApplicationRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 subscribeTenantApplicationRequest.validate()
+            
+        
+        val delegate = tenantApplicationsApiDelegate ?: throw APINotImplementedException("API operation tenantApplicationsSubscribeTenantApplication has not been implemented yet.")
+        val result = delegate.tenantApplicationsSubscribeTenantApplication(tenantId, subscribeTenantApplicationRequest, call)
+        call.respond(result)
+        
         
     }
     patch<Paths.tenantApplicationsUpdateTenantApplication> { tenantApplicationsUpdateTenantApplication ->
-        val exampleContentType = "application/json"
-        val exampleContentString = """{
-          "id" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "tenantId" : "046b6c7f-0b8a-43b9-b35d-6489e6daee91",
-          "clientId" : "clientId",
-          "status" : 0,
-          "expireTime" : "2000-01-23T04:56:07.000+00:00",
-          "createdAt" : "2000-01-23T04:56:07.000+00:00"
-        }"""
+        val tenantApplicationsApiDelegate: TenantApplicationsApiDelegate? by call.delegates
+        val tenantId = tenantApplicationsUpdateTenantApplication.tenantId
+        val clientId = tenantApplicationsUpdateTenantApplication.clientId
+        val updateTenantApplicationRequest = call.receive<UpdateTenantApplicationRequest>()
         
-        when (exampleContentType) {
-            "application/json" -> call.respondText(exampleContentType, ContentType.Application.Json)
-            "application/xml" -> call.respondText(exampleContentString, ContentType.Text.Xml)
-            else -> call.respondText(exampleContentString)
-        }
+        
+                 updateTenantApplicationRequest.validate()
+            
+        
+        val delegate = tenantApplicationsApiDelegate ?: throw APINotImplementedException("API operation tenantApplicationsUpdateTenantApplication has not been implemented yet.")
+        val result = delegate.tenantApplicationsUpdateTenantApplication(tenantId, clientId, updateTenantApplicationRequest, call)
+        call.respond(result)
+        
         
     }
 }

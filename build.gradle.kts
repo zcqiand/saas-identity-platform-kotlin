@@ -37,6 +37,21 @@ dependencies {
   implementation("org.jetbrains.exposed:exposed-kotlin-datetime")
   implementation("org.jetbrains.exposed:exposed-json")
   implementation("org.postgresql:r2dbc-postgresql:1.1.3.RELEASE")
+  // route 缝委托（Phase 3）：generator delegatePattern 生成的 interface + call.delegates 基建
+  // 都在生成区；这里只补业务侧依赖。content-negotiation=DTO JSON 收发；status-pages=异常映射。
+  implementation("io.ktor:ktor-server-content-negotiation")
+  implementation("io.ktor:ktor-serialization-kotlinx-json")
+  implementation("io.ktor:ktor-server-status-pages")
+  // R2DBC suspend 查询（ADR-0046 预告路径）：exposed-r2dbc BOM 收口；池件 BOM 外钉 exact。
+  implementation("org.jetbrains.exposed:exposed-r2dbc")
+  implementation("io.r2dbc:r2dbc-pool:1.0.2.RELEASE")
+  // JWT HS256 签发（jjwt 0.12.x fluent API）；impl/jackson runtime-only。
+  implementation("io.jsonwebtoken:jjwt-api:0.12.6")
+  runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
+  runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+  // 测试 scratch 库 admin DDL（DROP/CREATE DATABASE 不能跑在事务内，R2DBC 事务壳不适合；JDBC 直连）
+  testImplementation("org.postgresql:postgresql:42.7.7")
+  testImplementation("io.ktor:ktor-server-test-host")
 }
 
 kotlin { jvmToolchain(21) }

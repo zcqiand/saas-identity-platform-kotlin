@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param username 
@@ -25,4 +26,47 @@ data class LoginRequest(
     val password: kotlin.String,
     val clientId: kotlin.String
 )
+{
+        fun validate() {
+            if ((username).length < 1) {
+        throw BadParameterException(
+            message = "Property username length should be >= 1",
+            parameterName = "username",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (username).length
+        )
+    }
+    if ((username).length > 64) {
+        throw BadParameterException(
+            message = "Property username length should be <= 64",
+            parameterName = "username",
+            validationType = "maxLength",
+            expectedValue = 64,
+            actualValue = (username).length
+        )
+    }
+    
+            if ((password).length < 1) {
+        throw BadParameterException(
+            message = "Property password length should be >= 1",
+            parameterName = "password",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (password).length
+        )
+    }
+    if ((password).length > 128) {
+        throw BadParameterException(
+            message = "Property password length should be <= 128",
+            parameterName = "password",
+            validationType = "maxLength",
+            expectedValue = 128,
+            actualValue = (password).length
+        )
+    }
+    
+            
+        }
+}
 

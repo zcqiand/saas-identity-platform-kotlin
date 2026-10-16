@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param code 
@@ -27,4 +28,12 @@ data class LockedAccountResponse(
     val lockedUntil: kotlin.String,
     val remainingAttempts: kotlin.Int? = null
 )
+{
+        fun validate() {
+            
+            
+            
+            
+        }
+}
 

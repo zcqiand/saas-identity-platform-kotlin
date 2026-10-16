@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param username 
@@ -27,4 +28,56 @@ data class CreateSysUserRequest(
     val email: kotlin.String? = null,
     val mobile: kotlin.String? = null
 )
+{
+        fun validate() {
+            if ((username).length < 1) {
+        throw BadParameterException(
+            message = "Property username length should be >= 1",
+            parameterName = "username",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (username).length
+        )
+    }
+    if ((username).length > 64) {
+        throw BadParameterException(
+            message = "Property username length should be <= 64",
+            parameterName = "username",
+            validationType = "maxLength",
+            expectedValue = 64,
+            actualValue = (username).length
+        )
+    }
+    
+            if ((password).length < 8) {
+        throw BadParameterException(
+            message = "Property password length should be >= 8",
+            parameterName = "password",
+            validationType = "minLength",
+            expectedValue = 8,
+            actualValue = (password).length
+        )
+    }
+    if ((password).length > 256) {
+        throw BadParameterException(
+            message = "Property password length should be <= 256",
+            parameterName = "password",
+            validationType = "maxLength",
+            expectedValue = 256,
+            actualValue = (password).length
+        )
+    }
+    
+            if (!"^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$".toRegex().matches(email.toString())) {
+        throw BadParameterException(
+            message = "Property email should be a valid email",
+            parameterName = "email",
+            validationType = "email",
+            actualValue = email
+        )
+    }
+    
+            
+        }
+}
 

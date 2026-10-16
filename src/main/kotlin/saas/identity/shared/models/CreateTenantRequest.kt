@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param tenantKey 
@@ -23,4 +24,46 @@ data class CreateTenantRequest(
     val tenantKey: kotlin.String,
     val name: kotlin.String
 )
+{
+        fun validate() {
+            if ((tenantKey).length < 2) {
+        throw BadParameterException(
+            message = "Property tenantKey length should be >= 2",
+            parameterName = "tenantKey",
+            validationType = "minLength",
+            expectedValue = 2,
+            actualValue = (tenantKey).length
+        )
+    }
+    if ((tenantKey).length > 64) {
+        throw BadParameterException(
+            message = "Property tenantKey length should be <= 64",
+            parameterName = "tenantKey",
+            validationType = "maxLength",
+            expectedValue = 64,
+            actualValue = (tenantKey).length
+        )
+    }
+    
+            if ((name).length < 2) {
+        throw BadParameterException(
+            message = "Property name length should be >= 2",
+            parameterName = "name",
+            validationType = "minLength",
+            expectedValue = 2,
+            actualValue = (name).length
+        )
+    }
+    if ((name).length > 128) {
+        throw BadParameterException(
+            message = "Property name length should be <= 128",
+            parameterName = "name",
+            validationType = "maxLength",
+            expectedValue = 128,
+            actualValue = (name).length
+        )
+    }
+    
+        }
+}
 

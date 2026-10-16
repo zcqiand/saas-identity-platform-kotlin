@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param clientName 
@@ -35,4 +36,16 @@ data class UpdateOAuthClientRequest(
     val autoApprove: kotlin.Boolean? = null,
     val status: kotlin.Int? = null
 )
+{
+        fun validate() {
+            
+            
+            
+            
+            
+            
+            
+            
+        }
+}
 

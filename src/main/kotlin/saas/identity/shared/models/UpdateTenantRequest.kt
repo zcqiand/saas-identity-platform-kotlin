@@ -14,6 +14,7 @@ package saas.identity.shared.models
 import saas.identity.shared.models.TenantStatus
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param name 
@@ -24,4 +25,28 @@ data class UpdateTenantRequest(
     val name: kotlin.String? = null,
     val status: TenantStatus? = null
 )
+{
+        fun validate() {
+            if ((name ?: "").length < 2) {
+        throw BadParameterException(
+            message = "Property name length should be >= 2",
+            parameterName = "name",
+            validationType = "minLength",
+            expectedValue = 2,
+            actualValue = (name ?: "").length
+        )
+    }
+    if ((name ?: "").length > 128) {
+        throw BadParameterException(
+            message = "Property name length should be <= 128",
+            parameterName = "name",
+            validationType = "maxLength",
+            expectedValue = 128,
+            actualValue = (name ?: "").length
+        )
+    }
+    
+            
+        }
+}
 

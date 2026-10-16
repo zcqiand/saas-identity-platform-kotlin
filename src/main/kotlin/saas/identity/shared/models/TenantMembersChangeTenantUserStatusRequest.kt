@@ -14,6 +14,7 @@ package saas.identity.shared.models
 import saas.identity.shared.models.TenantMemberStatus
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param status 
@@ -22,4 +23,9 @@ import kotlinx.serialization.Serializable
 data class TenantMembersChangeTenantUserStatusRequest(
     val status: TenantMemberStatus
 )
+{
+        fun validate() {
+            
+        }
+}
 

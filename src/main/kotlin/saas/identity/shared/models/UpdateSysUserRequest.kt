@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param email 
@@ -23,4 +24,18 @@ data class UpdateSysUserRequest(
     val email: kotlin.String? = null,
     val mobile: kotlin.String? = null
 )
+{
+        fun validate() {
+            if (!"^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$".toRegex().matches(email.toString())) {
+        throw BadParameterException(
+            message = "Property email should be a valid email",
+            parameterName = "email",
+            validationType = "email",
+            actualValue = email
+        )
+    }
+    
+            
+        }
+}
 

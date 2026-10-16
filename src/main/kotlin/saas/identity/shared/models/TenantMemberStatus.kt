@@ -30,5 +30,15 @@ enum class TenantMemberStatus(val value: kotlin.String) {
     @kotlinx.serialization.SerialName("disabled")
     disabled("disabled");
 
+
+    companion object {
+        /**
+         * Returns the enum individual associated with the [value] passed as parameter.
+         *
+         * @throws IllegalArgumentException if no enum individual is associated with the [value] passed as parameter.
+         */
+        fun fromValue(value: kotlin.String): TenantMemberStatus =
+            values().firstOrNull { it.value == value } ?: throw IllegalArgumentException("No enum constant TenantMemberStatus.$value")
+    }
 }
 

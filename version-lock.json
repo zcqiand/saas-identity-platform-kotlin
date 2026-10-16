@@ -9,6 +9,10 @@
     "ktfmt": "0.27.0",
     "junit": "6.1.3",
     "exposed": "1.5.1（exposed-bom 收口，禁裸写版本；包名 org.jetbrains.exposed.v1.*，datetime 模块无 .kotlin 段）",
+    "exposed-r2dbc": "1.5.1（exposed-bom 收口，禁裸写版本；事务入口 suspendTransaction 在 .transactions 子包）",
+    "jjwt": "0.12.6（api 显式 + impl/jackson runtimeOnly）",
+    "r2dbc-pool": "1.0.2.RELEASE（BOM 外钉 exact）",
+    "postgresql-jdbc": "42.7.7（testImplementation，scratch 库 admin DDL 用）",
     "r2dbc-postgresql": "1.1.3.RELEASE",
     "jdk": "21"
   }

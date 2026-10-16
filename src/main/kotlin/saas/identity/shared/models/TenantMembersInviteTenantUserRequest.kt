@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param email 
@@ -23,4 +24,10 @@ data class TenantMembersInviteTenantUserRequest(
     val email: kotlin.String? = null,
     val mobile: kotlin.String? = null
 )
+{
+        fun validate() {
+            
+            
+        }
+}
 

@@ -14,6 +14,7 @@ package saas.identity.shared.models
 import saas.identity.shared.models.SysMenuType
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param parentId 
@@ -38,4 +39,27 @@ data class UpdateSysMenuRequest(
     val sortOrder: kotlin.Int? = null,
     val status: kotlin.Int? = null
 )
+{
+        fun validate() {
+            try {
+        kotlin.uuid.Uuid.parse(parentId.toString())
+    } catch (e: IllegalArgumentException) {
+        throw BadParameterException(
+            message = "Property parentId should be a valid UUID",
+            parameterName = "parentId",
+            validationType = "uuid",
+            actualValue = parentId
+        )
+    }
+    
+            
+            
+            
+            
+            
+            
+            
+            
+        }
+}
 

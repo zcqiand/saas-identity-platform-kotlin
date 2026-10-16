@@ -41,6 +41,7 @@ npx --yes @openapitools/openapi-generator-cli generate \
   --model-package saas.identity.shared.models \
   --api-package saas.identity.shared.api \
   --additional-properties=hideGenerationTimestamp=true \
+  --additional-properties=delegatePattern=true \
   --type-mappings "object=JsonElement,kotlin.Any=kotlinx.serialization.json.JsonElement" \
   --import-mappings "UUID=kotlin.uuid.Uuid,JsonElement=kotlinx.serialization.json.JsonElement"
 

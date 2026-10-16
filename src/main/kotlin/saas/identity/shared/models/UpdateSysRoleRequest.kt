@@ -13,6 +13,7 @@ package saas.identity.shared.models
 
 
 import kotlinx.serialization.Serializable
+import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param roleName 
@@ -25,4 +26,29 @@ data class UpdateSysRoleRequest(
     val description: kotlin.String? = null,
     val status: kotlin.Int? = null
 )
+{
+        fun validate() {
+            if ((roleName ?: "").length < 1) {
+        throw BadParameterException(
+            message = "Property roleName length should be >= 1",
+            parameterName = "roleName",
+            validationType = "minLength",
+            expectedValue = 1,
+            actualValue = (roleName ?: "").length
+        )
+    }
+    if ((roleName ?: "").length > 64) {
+        throw BadParameterException(
+            message = "Property roleName length should be <= 64",
+            parameterName = "roleName",
+            validationType = "maxLength",
+            expectedValue = 64,
+            actualValue = (roleName ?: "").length
+        )
+    }
+    
+            
+            
+        }
+}
 
