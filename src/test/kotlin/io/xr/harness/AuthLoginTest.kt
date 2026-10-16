@@ -185,6 +185,15 @@ class AuthLoginTest {
   }
 
   @Test
+  fun activeUserStatusReportsActiveAfterDomainGuard() {
+    // 终审阻断项回归钉：status=1 是活跃常态，域外兜底改造（else→disabled）不得波及它
+    // （终审首版漏 1→active 显式支，全量活跃用户被改报 disabled，假绿 19/19）
+    val dto = decodeLogin(postLogin(loginBody("alice", "dev123456")))
+    assertEquals("active", dto.user.status.toString())
+    assertEquals("active", dto.availableTenants.single().status.toString())
+  }
+
+  @Test
   fun outOfDomainUserStatusReportsDisabled() = runBlocking {
     // 家族镜像语义：sys_user.status 域外值兜底 disabled（fastapi assemble.py:40），
     // Phase 3 曾兜 active（终审 deferred minor，Phase 4 搭车修）。列形照 ScratchDb seed。

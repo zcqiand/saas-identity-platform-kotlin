@@ -190,17 +190,20 @@ class AuthApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssu
           }
           .map { it[TenantMemberRoleTable.roleId].toString() }
 
-  // 域外值兜底 disabled（fastapi assemble.py 镜像；Phase 4 搭车修）
+  // 域外值兜底 disabled（fastapi assemble.py 镜像；Phase 4 搭车修）——
+  // active 必须显式支（终审教训：翻转 else 兜底时漏掉常态支 = 全量活跃用户假 disabled）
   private fun userStatusFromDb(value: Short): SysUserStatus =
       when (value.toInt()) {
+        STATUS_ACTIVE.toInt() -> SysUserStatus.active
         2 -> SysUserStatus.invited
         0 -> SysUserStatus.disabled
         else -> SysUserStatus.disabled
       }
 
-  // 同族兜底一致（登录路径只有 status==1 行进此函数，else 支纯镜像防御）
+  // 同族兜底一致（status==1 显式支；else 支纯镜像防御，登录路径不可达）
   private fun memberStatusFromDb(value: Short): TenantMemberStatus =
       when (value.toInt()) {
+        STATUS_ACTIVE.toInt() -> TenantMemberStatus.active
         2 -> TenantMemberStatus.invited
         STATUS_SUSPENDED -> TenantMemberStatus.suspended
         0 -> TenantMemberStatus.disabled
