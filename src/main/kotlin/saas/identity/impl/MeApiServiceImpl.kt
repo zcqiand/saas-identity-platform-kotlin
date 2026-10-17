@@ -2,7 +2,10 @@ package saas.identity.impl
 
 import io.jsonwebtoken.Claims
 import io.ktor.server.routing.RoutingCall
+import java.time.OffsetDateTime
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.any
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.toList
 import org.jetbrains.exposed.v1.core.ResultRow
@@ -14,8 +17,10 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import saas.identity.entity.SysUserTable
 import saas.identity.entity.TenantMemberRoleTable
 import saas.identity.entity.TenantMemberTable
+import saas.identity.entity.TenantTable
 import saas.identity.shared.api.MeApiDelegate
 import saas.identity.shared.models.CurrentUser
+import saas.identity.shared.models.SwitchTenantResponse
 import saas.identity.shared.models.TenantMembership
 
 /** me 族（fastapi me_impl.py 镜像）。本切片全 4 op；member 查询恒 created_at ASC + id ASC（防首个漂移）。 */
@@ -61,7 +66,39 @@ class MeApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssuer
       tenantId: String,
       clientId: String?,
       call: RoutingCall,
-  ): saas.identity.shared.models.SwitchTenantResponse = TODO("Task 4")
+  ): SwitchTenantResponse {
+    val claims = requireBearer(call, jwt)
+    val userId =
+        uuidOrNull(claims.subject)
+            ?: throw InvalidCredentialsError("Bearer sub required for tenant switch")
+    val target = uuidOrNull(tenantId) ?: throw BadRequestError("invalid tenantId: $tenantId")
+    val tenantExists =
+        suspendTransaction(db) {
+          TenantTable.selectAll().where { TenantTable.id eq target }.firstOrNull() != null
+        }
+    if (!tenantExists) throw NotFoundError("tenant $target")
+    // 成员资格门槛 = 非 disabled（status≠0；invited/suspended 可切；S5 口径）
+    val isMember =
+        suspendTransaction(db) {
+          TenantMemberTable.selectAll()
+              .where { TenantMemberTable.userId eq userId }
+              .any {
+                it[TenantMemberTable.tenantId] == target &&
+                    it[TenantMemberTable.status] != 0.toShort()
+              }
+        }
+    if (!isMember) {
+      throw NotFoundError("user $userId is not an active member of tenant $target")
+    }
+    // refresh 纯构造不落库（fastapi me_impl.py:206-207 镜像）
+    val refresh = "saas-rt-$userId-${System.currentTimeMillis()}-${Uuid.random()}"
+    return SwitchTenantResponse(
+        accessToken = jwt.issueAccessToken(userId, target),
+        refreshToken = refresh,
+        expiresAt = iso(OffsetDateTime.now().plusSeconds(jwt.ttlSeconds)),
+        tenantId = target,
+    )
+  }
 
   /** membership 全量行（无 status 过滤），固定序。 */
   private suspend fun membersOf(userId: Uuid): List<TenantMembership> =

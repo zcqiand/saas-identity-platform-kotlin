@@ -194,6 +194,103 @@ class MeApiTest {
     assertEquals(0, Json.parseToJsonElement(resp.body).jsonArray.size)
   }
 
+  /** switch 族（M01.F03.I02；fastapi me_impl.py switch_tenant 镜像）。 */
+  private suspend fun switchTenant(token: String, tenantId: String): Reply = withApp { client ->
+    val r =
+        client.post("/api/v1/me/tenants/$tenantId/switch") {
+          header("Authorization", "Bearer $token")
+        }
+    Reply(r.status, r.bodyAsText())
+  }
+
+  /** 切换重发对：新 access 带 target claim、refresh 纯构造前缀、expiresAt/tenantId 回显。 */
+  @Test
+  @Fn(["M01.F03.I02"])
+  fun switchTenantReissuesWithTargetClaim() {
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { switchTenant(token, ScratchDb.TENANT2.toString()) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    val newAccess = obj["accessToken"]!!.jsonPrimitive.content
+    assertEquals(
+        ScratchDb.TENANT2.toString(),
+        jwt.decode(newAccess).get("tenant_id"),
+    )
+    assertTrue(obj["refreshToken"]!!.jsonPrimitive.content.startsWith("saas-rt-"))
+    assertTrue(obj["expiresAt"]!!.jsonPrimitive.content.isNotEmpty())
+    assertEquals(ScratchDb.TENANT2.toString(), obj["tenantId"]!!.jsonPrimitive.content)
+  }
+
+  /** 非 member 租户 → 404 NOT_FOUND 不 403（me_impl.py 语义锚点：不泄露租户存在性）。 */
+  @Test
+  @Fn(["M01.F03.I02"])
+  fun switchToNonMemberTenantIs404Not403() {
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { switchTenant(token, ScratchDb.TENANT3.toString()) }
+    assertEquals(HttpStatusCode.NotFound, resp.status)
+    assertTrue(resp.body.contains("not an active member"))
+  }
+
+  /** 门槛 = 非 disabled：invited(2)/suspended(3) 可切，disabled(0) 404（S5 口径）。 */
+  @Test
+  @Fn(["M01.F03.I02"])
+  fun invitedAndSuspendedMembersMaySwitchDisabledMayNot() {
+    val bob = Uuid.parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
+    val carol = Uuid.parse("cccccccc-cccc-cccc-cccc-cccccccccccc")
+    runBlocking {
+      insertMember(Uuid.random(), ScratchDb.TENANT2, bob, 2.toShort())
+      insertMember(Uuid.random(), ScratchDb.TENANT2, carol, 3.toShort())
+      insertMember(Uuid.random(), ScratchDb.TENANT2, ScratchDb.DAVE, 0.toShort())
+    }
+    val bobReply = runBlocking {
+      switchTenant(jwt.issueAccessToken(bob, ScratchDb.TENANT1), ScratchDb.TENANT2.toString())
+    }
+    assertEquals(HttpStatusCode.OK, bobReply.status)
+    val carolReply = runBlocking {
+      switchTenant(jwt.issueAccessToken(carol, ScratchDb.TENANT1), ScratchDb.TENANT2.toString())
+    }
+    assertEquals(HttpStatusCode.OK, carolReply.status)
+    val daveReply = runBlocking {
+      switchTenant(
+          jwt.issueAccessToken(ScratchDb.DAVE, ScratchDb.TENANT3),
+          ScratchDb.TENANT2.toString(),
+      )
+    }
+    assertEquals(HttpStatusCode.NotFound, daveReply.status)
+  }
+
+  /** 未知租户 → 404（message 含 tenant）。 */
+  @Test
+  @Fn(["M01.F03.I02"])
+  fun switchUnknownTenantIs404() {
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { switchTenant(token, Uuid.random().toString()) }
+    assertEquals(HttpStatusCode.NotFound, resp.status)
+    assertTrue(resp.body.contains("tenant"))
+  }
+
+  /** 非 UUID 路径参 → 400 BAD_REQUEST。 */
+  @Test
+  @Fn(["M01.F03.I02"])
+  fun switchBadUuidIs400() {
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { switchTenant(token, "not-a-uuid") }
+    assertEquals(HttpStatusCode.BadRequest, resp.status)
+  }
+
+  /** 旧 token 不失效：switch 后旧 access 仍可 GET /me 200。 */
+  @Test
+  fun switchTenantOldTokenStillValid() {
+    val token = runBlocking { loginToken("alice") }
+    val switch = runBlocking { switchTenant(token, ScratchDb.TENANT2.toString()) }
+    assertEquals(HttpStatusCode.OK, switch.status)
+    val after = withApp { client ->
+      val r = client.get("/api/v1/me") { header("Authorization", "Bearer $token") }
+      Reply(r.status, r.bodyAsText())
+    }
+    assertEquals(HttpStatusCode.OK, after.status)
+  }
+
   /** 设施面：无头 / 非 Bearer 前缀 / Bearer 空串三路 401（不挂 ID）。 */
   @Test
   fun meBearerBoundariesAre401() {

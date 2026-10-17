@@ -12,7 +12,7 @@ class JwtIssuer(
     signingKey: String,
     private val issuer: String,
     private val audience: String,
-    private val ttlSeconds: Long,
+    val ttlSeconds: Long,
 ) {
 
   private val key: SecretKey
