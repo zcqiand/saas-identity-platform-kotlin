@@ -10,16 +10,13 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import kotlin.uuid.Uuid
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.insert
-import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -103,11 +100,6 @@ class MeApiTest {
           it[createdAt] = java.time.OffsetDateTime.parse("2026-06-01T00:00:00+00:00")
           it[updatedAt] = java.time.OffsetDateTime.parse("2026-06-01T00:00:00+00:00")
         }
-      }
-
-  private suspend fun memberCount(userId: Uuid): Int =
-      suspendTransaction(db) {
-        TenantMemberTable.selectAll().where { TenantMemberTable.userId eq userId }.toList().size
       }
 
   /** claim tenant_id 优先；memberships 全量（whoami 不过滤订阅/状态，与 login 的 availableTenants 不同）。 */

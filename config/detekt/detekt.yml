@@ -3,4 +3,16 @@ build:
 complexity:
   TooManyFunctions:
     active: true
-    excludes: ['**/HarnessTraceListener.kt'] # porter 类职责单一，10 个小私有方法是形态本身（定向豁免替代 Phase 0 全局关，Phase 1 终审修复项）
+    excludes:
+      [
+        '**/HarnessTraceListener.kt', # porter 类职责单一，10 个小私有方法是形态本身（定向豁免替代 Phase 0 全局关，Phase 1 终审修复项）
+        '**/test/**', # 测试类一用例一方法 + 少量 fixture helper，方法数是验收面本身（Phase 6 T9）
+        '**/ScratchDb.kt', # 表驱动种子 object：每表一个 seed 方法是夹具形态，拆分只制造间接层（Phase 6 T9）
+      ]
+  LongMethod:
+    active: true
+    excludes: ['**/ScratchDb.kt'] # 同上：种子方法 = 字面量行序列，抽函数不降复杂度（Phase 6 T9）
+style:
+  ThrowsCount:
+    active: true
+    excludes: ['**/OauthApiServiceImpl.kt'] # oauth 错误映射每个 guard 一个 throw，与 fastapi mirror 逐分支对齐——分支数=协议错误面本身（Phase 6 T9）

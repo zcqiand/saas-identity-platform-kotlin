@@ -22,8 +22,8 @@ class AdminTenantsApiServiceImpl(private val db: R2dbcDatabase, private val jwt:
   ): AdminTenantsListTenants200Response {
     // 平台域 dev 简化：只要求有效 Bearer，不挂 TenantGuard（springboot 参照）
     requireBearer(call, jwt)
-    val p = page ?: 0
-    val ps = pageSize ?: 20
+    val p = page ?: DEFAULT_PAGE
+    val ps = pageSize ?: DEFAULT_PAGE_SIZE
     return suspendTransaction(db) {
       val total = TenantTable.selectAll().count()
       val rows =
@@ -45,5 +45,12 @@ class AdminTenantsApiServiceImpl(private val db: R2dbcDatabase, private val jwt:
           total = total,
       )
     }
+  }
+
+  companion object {
+
+    // fastapi tenants_impl 缺省 page=0/pageSize=20（lab 消费形态显式传参不受影响）
+    const val DEFAULT_PAGE = 0
+    const val DEFAULT_PAGE_SIZE = 20
   }
 }

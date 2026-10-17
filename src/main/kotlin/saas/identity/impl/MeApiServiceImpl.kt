@@ -209,10 +209,14 @@ private fun buildMenuTree(rows: List<ResultRow>): List<EffectiveMenuNode> {
 /** 1=directory / 3=button / 2 与未知=menu（menus_impl.py:55-60 镜像；Short 列型按家族 when(toInt()) 口径）。 */
 internal fun sysMenuTypeFromDb(value: Short): SysMenuType =
     when (value.toInt()) {
-      1 -> SysMenuType.directory
-      3 -> SysMenuType.button
+      MENU_TYPE_DIRECTORY -> SysMenuType.directory
+      MENU_TYPE_BUTTON -> SysMenuType.button
       else -> SysMenuType.menu
     }
+
+// sys_menu.type 字典值（fastapi seed 与查询同语义；命名替代裸字面量）
+private const val MENU_TYPE_DIRECTORY = 1
+private const val MENU_TYPE_BUTTON = 3
 
 /** claims 取 subject 的共享收口（whoami/switch/menus 三处同语义）。 */
 internal fun Claims.subjectUuid(): Uuid? = uuidOrNull(subject)

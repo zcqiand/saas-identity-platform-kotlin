@@ -43,8 +43,35 @@ fun Application.harnessModule(cfg: AppConfig) {
   install(ContentNegotiation) { json() }
   // 生成区 AuthApi 用 typed routing（post<Paths.…>），必须装 Resources 插件
   install(Resources)
+  installErrorMapping()
+  delegates(
+      AppDelegates(
+          authApiDelegate = AuthApiServiceImpl(db, jwt),
+          adminTenantsApiDelegate = AdminTenantsApiServiceImpl(db, jwt),
+          meApiDelegate = MeApiServiceImpl(db, jwt),
+          oauthApiDelegate = OauthApiServiceImpl(db, jwt, TokenPair(db)),
+      )
+  )
+  routing {
+    // 家族探活契约形状：GET /health → {"ok":true,"mode":"ktor"}。
+    get("/health") {
+      call.respondText("""{"ok":true,"mode":"ktor"}""", ContentType.Application.Json)
+    }
+    AuthApi()
+    AdminTenantsApi()
+    MeApi()
+    OauthApi()
+  }
+}
+
+fun main() {
+  val cfg = appConfigFromEnv()
+  embeddedServer(Netty, port = cfg.serverPort) { harnessModule(cfg) }.start(wait = true)
+}
+
+/** 错误只走异常映射（Review Focus 1：impl 永不直接 respond，防双 respond 崩）。 */
+private fun Application.installErrorMapping() {
   install(StatusPages) {
-    // 错误只走异常映射（Review Focus 1：impl 永不直接 respond，防双 respond 崩）
     exception<InvalidCredentialsError> { call, _ ->
       call.respond(
           HttpStatusCode.Unauthorized,
@@ -92,27 +119,4 @@ fun Application.harnessModule(cfg: AppConfig) {
       )
     }
   }
-  delegates(
-      AppDelegates(
-          authApiDelegate = AuthApiServiceImpl(db, jwt),
-          adminTenantsApiDelegate = AdminTenantsApiServiceImpl(db, jwt),
-          meApiDelegate = MeApiServiceImpl(db, jwt),
-          oauthApiDelegate = OauthApiServiceImpl(db, jwt, TokenPair(db)),
-      )
-  )
-  routing {
-    // 家族探活契约形状：GET /health → {"ok":true,"mode":"ktor"}。
-    get("/health") {
-      call.respondText("""{"ok":true,"mode":"ktor"}""", ContentType.Application.Json)
-    }
-    AuthApi()
-    AdminTenantsApi()
-    MeApi()
-    OauthApi()
-  }
-}
-
-fun main() {
-  val cfg = appConfigFromEnv()
-  embeddedServer(Netty, port = cfg.serverPort) { harnessModule(cfg) }.start(wait = true)
 }
