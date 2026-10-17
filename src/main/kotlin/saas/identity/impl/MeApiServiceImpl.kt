@@ -11,16 +11,21 @@ import kotlinx.coroutines.flow.toList
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.SortOrder
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.inList
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import saas.identity.entity.SysMenuTable
+import saas.identity.entity.SysRoleMenuTable
 import saas.identity.entity.SysUserTable
 import saas.identity.entity.TenantMemberRoleTable
 import saas.identity.entity.TenantMemberTable
 import saas.identity.entity.TenantTable
 import saas.identity.shared.api.MeApiDelegate
 import saas.identity.shared.models.CurrentUser
+import saas.identity.shared.models.EffectiveMenuNode
 import saas.identity.shared.models.SwitchTenantResponse
+import saas.identity.shared.models.SysMenuType
 import saas.identity.shared.models.TenantMembership
 
 /** me 族（fastapi me_impl.py 镜像）。本切片全 4 op；member 查询恒 created_at ASC + id ASC（防首个漂移）。 */
@@ -60,7 +65,37 @@ class MeApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssuer
   override suspend fun meGetMyMenus(
       clientId: String?,
       call: RoutingCall,
-  ): Map<String, List<saas.identity.shared.models.EffectiveMenuNode>> = TODO("Task 5")
+  ): Map<String, List<EffectiveMenuNode>> {
+    val claims = requireBearer(call, jwt)
+    // 无 sub → 空 Map（me_impl.py:83-84 镜像，不 401）
+    val userId = uuidOrNull(claims.subject) ?: return emptyMap()
+    return suspendTransaction(db) {
+      val memberIds =
+          TenantMemberTable.selectAll()
+              .where { TenantMemberTable.userId eq userId }
+              .toList()
+              .map { it[TenantMemberTable.id] }
+      if (memberIds.isEmpty()) return@suspendTransaction emptyMap()
+      val roleIds =
+          TenantMemberRoleTable.selectAll()
+              .where { TenantMemberRoleTable.memberId inList memberIds }
+              .toList()
+              .map { it[TenantMemberRoleTable.roleId] }
+      if (roleIds.isEmpty()) return@suspendTransaction emptyMap()
+      val menuIds =
+          SysRoleMenuTable.selectAll()
+              .where { SysRoleMenuTable.roleId inList roleIds }
+              .toList()
+              .map { it[SysRoleMenuTable.menuId] }
+      if (menuIds.isEmpty()) return@suspendTransaction emptyMap()
+      // clientId query 收但恒全量分组（me_impl.py:117-119 镜像）
+      SysMenuTable.selectAll()
+          .where { SysMenuTable.id inList menuIds }
+          .toList()
+          .groupBy { it[SysMenuTable.clientId] }
+          .mapValues { (_, rows) -> buildMenuTree(rows) }
+    }
+  }
 
   override suspend fun meSwitchTenant(
       tenantId: String,
@@ -132,6 +167,52 @@ class MeApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssuer
           }
           .map { it[TenantMemberRoleTable.roleId].toString() }
 }
+
+/**
+ * 组树：parent 在授权集合内 → 挂 children，否则（含孤儿/零值 sentinel/自指）当 root。生成 EffectiveMenuNode.children 是不可变
+ * List——plan 的 parent.children.add 编不过，改局部 mutable map + copy 递归填充。children
+ * 保持装载序不重排；只排根层（me_impl.py:307-311 镜像）。
+ */
+private fun buildMenuTree(rows: List<ResultRow>): List<EffectiveMenuNode> {
+  val nodes = rows.associate { row ->
+    row[SysMenuTable.id] to
+        EffectiveMenuNode(
+            id = row[SysMenuTable.id],
+            clientId = row[SysMenuTable.clientId],
+            // 非空契约 Ruling：参考吐 null 的场景此处零值/孤儿 parent 原样回显（tracker 5.112 候选）
+            parentId = row[SysMenuTable.parentId],
+            title = row[SysMenuTable.title],
+            type = sysMenuTypeFromDb(row[SysMenuTable.type]),
+            sortOrder = row[SysMenuTable.sortOrder],
+            children = emptyList(),
+            path = row[SysMenuTable.path],
+            component = row[SysMenuTable.component],
+            perms = row[SysMenuTable.perms],
+            icon = row[SysMenuTable.icon],
+        )
+  }
+  val childrenOf = HashMap<Uuid, MutableList<EffectiveMenuNode>>()
+  val roots = mutableListOf<EffectiveMenuNode>()
+  for (row in rows) {
+    val node = nodes.getValue(row[SysMenuTable.id])
+    val parent = nodes[row[SysMenuTable.parentId]]
+    if (parent == null || parent.id == node.id) roots.add(node)
+    else childrenOf.getOrPut(parent.id) { mutableListOf() }.add(node)
+  }
+
+  fun fill(node: EffectiveMenuNode): EffectiveMenuNode =
+      node.copy(children = (childrenOf[node.id] ?: emptyList()).map { fill(it) })
+
+  return roots.sortedBy { it.sortOrder }.map { fill(it) }
+}
+
+/** 1=directory / 3=button / 2 与未知=menu（menus_impl.py:55-60 镜像；Short 列型按家族 when(toInt()) 口径）。 */
+internal fun sysMenuTypeFromDb(value: Short): SysMenuType =
+    when (value.toInt()) {
+      1 -> SysMenuType.directory
+      3 -> SysMenuType.button
+      else -> SysMenuType.menu
+    }
 
 /** claims 取 subject 的共享收口（whoami/switch/menus 三处同语义）。 */
 internal fun Claims.subjectUuid(): Uuid? = uuidOrNull(subject)

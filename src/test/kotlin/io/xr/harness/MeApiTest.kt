@@ -28,6 +28,8 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import saas.identity.entity.SysMenuTable
+import saas.identity.entity.SysRoleMenuTable
 import saas.identity.entity.TenantMemberTable
 import saas.identity.impl.JwtIssuer
 
@@ -289,6 +291,151 @@ class MeApiTest {
       Reply(r.status, r.bodyAsText())
     }
     assertEquals(HttpStatusCode.OK, after.status)
+  }
+
+  /** menus 族（M04.F04.I08；fastapi me_impl.py get_my_menus 镜像）。 */
+  private suspend fun getMenus(token: String?): Reply = withApp { client ->
+    val builder =
+        if (token == null) client.get("/api/v1/me/menus")
+        else {
+          client.get("/api/v1/me/menus") { header("Authorization", "Bearer $token") }
+        }
+    Reply(builder.status, builder.bodyAsText())
+  }
+
+  /** 四跳 join：member→role→menu→rows，按 clientId 分组组树；root 层 parentId 零值原样回显（Ruling 非空契约）。 */
+  @Test
+  @Fn(["M04.F04.I08"])
+  fun menusGroupsByClientAndBuildsTree() {
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { getMenus(token) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    val console = obj["saas-console"]!!.jsonArray
+    assertEquals(1, console.size)
+    val root = console[0].jsonObject
+    assertEquals(ScratchDb.MENU_ROOT.toString(), root["id"]!!.jsonPrimitive.content)
+    assertEquals(ScratchDb.ZERO_UUID.toString(), root["parentId"]!!.jsonPrimitive.content)
+    assertEquals("directory", root["type"]!!.jsonPrimitive.content)
+    assertEquals(
+        listOf(ScratchDb.MENU_CHILD.toString()),
+        root["children"]!!.jsonArray.map { it.jsonObject["id"]!!.jsonPrimitive.content },
+    )
+    val second = obj["second-app"]!!.jsonArray
+    assertEquals(
+        listOf(ScratchDb.MENU_OTHER_CLIENT.toString()),
+        second.map { it.jsonObject["id"]!!.jsonPrimitive.content },
+    )
+  }
+
+  /** root 层按 sortOrder 升序；children 保持装载序不重排（me_impl.py:307-311 镜像）。 */
+  @Test
+  @Fn(["M04.F04.I08"])
+  fun menusRootsSortedBySortOrderChildrenKeepInsertion() {
+    val extraRoot = Uuid.parse("17171717-1717-1717-1717-171717171717")
+    val lateChild = Uuid.parse("18181818-1818-1818-1818-181818181818")
+    runBlocking {
+      suspendTransaction(db) {
+        // 新 root：sortOrder=0（< MENU_ROOT 的 1）→ 排最前
+        SysMenuTable.insert {
+          it[id] = extraRoot
+          it[clientId] = ScratchDb.CLIENT_ID
+          it[parentId] = ScratchDb.ZERO_UUID
+          it[title] = "前置菜单"
+          it[type] = 1
+          it[path] = "/first"
+          it[component] = null
+          it[perms] = null
+          it[icon] = null
+          it[sortOrder] = 0
+          it[status] = 1
+          it[createdAt] = java.time.OffsetDateTime.parse("2026-01-01T00:00:00+00:00")
+        }
+        // MENU_ROOT 第二个 child：sortOrder=0 但装载在后 → children[0] 仍 MENU_CHILD
+        SysMenuTable.insert {
+          it[id] = lateChild
+          it[clientId] = ScratchDb.CLIENT_ID
+          it[parentId] = ScratchDb.MENU_ROOT
+          it[title] = "后挂子页"
+          it[type] = 2
+          it[path] = "/late"
+          it[component] = null
+          it[perms] = null
+          it[icon] = null
+          it[sortOrder] = 0
+          it[status] = 1
+          it[createdAt] = java.time.OffsetDateTime.parse("2026-01-01T00:00:00+00:00")
+        }
+        SysRoleMenuTable.insert {
+          it[roleId] = ScratchDb.ROLE1
+          it[menuId] = extraRoot
+        }
+        SysRoleMenuTable.insert {
+          it[roleId] = ScratchDb.ROLE1
+          it[menuId] = lateChild
+        }
+      }
+    }
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { getMenus(token) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val console = Json.parseToJsonElement(resp.body).jsonObject["saas-console"]!!.jsonArray
+    assertEquals(
+        listOf(extraRoot.toString(), ScratchDb.MENU_ROOT.toString()),
+        console.map { it.jsonObject["id"]!!.jsonPrimitive.content },
+    )
+    val root = console.first {
+      it.jsonObject["id"]!!.jsonPrimitive.content == ScratchDb.MENU_ROOT.toString()
+    }
+    assertEquals(
+        listOf(ScratchDb.MENU_CHILD.toString(), lateChild.toString()),
+        root.jsonObject["children"]!!.jsonArray.map { it.jsonObject["id"]!!.jsonPrimitive.content },
+    )
+  }
+
+  /** 孤儿：授权但 parent 不在授权集合 → 仍当 root，parentId 原样回显（非空契约 Ruling）。 */
+  @Test
+  @Fn(["M04.F04.I08"])
+  fun menusOrphanParentStillRootWithEchoedParentId() {
+    runBlocking {
+      suspendTransaction(db) {
+        SysRoleMenuTable.insert {
+          it[roleId] = ScratchDb.ROLE1
+          it[menuId] = ScratchDb.MENU_ORPHAN_CHILD
+        }
+      }
+    }
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { getMenus(token) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val console = Json.parseToJsonElement(resp.body).jsonObject["saas-console"]!!.jsonArray
+    val orphan = console.first {
+      it.jsonObject["id"]!!.jsonPrimitive.content == ScratchDb.MENU_ORPHAN_CHILD.toString()
+    }
+    assertEquals(
+        ScratchDb.ORPHAN_PARENT.toString(),
+        orphan.jsonObject["parentId"]!!.jsonPrimitive.content,
+    )
+    assertEquals("menu", orphan.jsonObject["type"]!!.jsonPrimitive.content)
+    assertEquals(0, orphan.jsonObject["children"]!!.jsonArray.size)
+  }
+
+  /** 空 chain（无 member / 无 role / 无 menu 授权）→ {}；无头 401。 */
+  @Test
+  @Fn(["M04.F04.I08"])
+  fun menusEmptyChainStagesReturnEmptyMap() {
+    val resp = runBlocking { getMenus(jwt.issueAccessToken(ScratchDb.CHARLIE, ScratchDb.TENANT1)) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    assertEquals(0, Json.parseToJsonElement(resp.body).jsonObject.size)
+    assertEquals(HttpStatusCode.Unauthorized, runBlocking { getMenus(null) }.status)
+  }
+
+  /** 未知用户（无 member 行）→ {} 不 401（me_impl.py:83-84 恒返回镜像）。 */
+  @Test
+  fun menusUnknownUserReturnsEmptyMap() {
+    val resp = runBlocking { getMenus(jwt.issueAccessToken(Uuid.random(), ScratchDb.TENANT1)) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    assertEquals(0, Json.parseToJsonElement(resp.body).jsonObject.size)
   }
 
   /** 设施面：无头 / 非 Bearer 前缀 / Bearer 空串三路 401（不挂 ID）。 */

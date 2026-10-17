@@ -11,6 +11,9 @@ import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import saas.identity.entity.OauthAccessTokenTable
 import saas.identity.entity.OauthClientTable
 import saas.identity.entity.OauthRefreshTokenTable
+import saas.identity.entity.SysMenuTable
+import saas.identity.entity.SysRoleMenuTable
+import saas.identity.entity.SysRoleTable
 import saas.identity.entity.SysUserTable
 import saas.identity.entity.TenantApplicationTable
 import saas.identity.entity.TenantMemberRoleTable
@@ -38,6 +41,15 @@ object ScratchDb {
   val ROLE1 = Uuid.parse("99999999-9999-9999-9999-999999999999")
   const val CLIENT_ID = "saas-console"
   const val SECOND_CLIENT_ID = "second-app"
+
+  // 菜单夹具（me/menus 用）：saas-console 两节点（root→child）+ 孤儿 + second-app 单节点
+  val MENU_ROOT = Uuid.parse("12121212-1212-1212-1212-121212121212")
+  val MENU_CHILD = Uuid.parse("13131313-1313-1313-1313-131313131313")
+  val MENU_ORPHAN_CHILD = Uuid.parse("14141414-1414-1414-1414-141414141414")
+  val MENU_OTHER_CLIENT = Uuid.parse("15151515-1515-1515-1515-151515151515")
+  // 真·孤儿父（不在授权集合、非零值）：固定值保证断言可回显（brief 的 Uuid.random() 改固定 sentinel——确定性）
+  val ORPHAN_PARENT = Uuid.parse("16161616-1616-1616-1616-161616161616")
+  val ZERO_UUID = Uuid.parse("00000000-0000-0000-0000-000000000000")
 
   private val rawUrl: String =
       System.getenv("DATABASE_URL")
@@ -98,6 +110,9 @@ object ScratchDb {
           OauthClientTable,
           OauthAccessTokenTable,
           OauthRefreshTokenTable,
+          SysRoleTable,
+          SysMenuTable,
+          SysRoleMenuTable,
       )
 
   suspend fun truncateAndSeed(db: R2dbcDatabase) {
@@ -112,6 +127,7 @@ object ScratchDb {
       seedUsers(t0)
       seedMembers(t0)
       seedClients(t0)
+      seedMenus(t0)
     }
   }
 
@@ -205,6 +221,90 @@ object ScratchDb {
       it[memberId] = MEMBER1
       it[roleId] = ROLE1
     }
+  }
+
+  private suspend fun seedMenus(t0: java.time.OffsetDateTime) {
+    SysRoleTable.insert {
+      it[id] = ROLE1
+      it[tenantId] = TENANT1
+      it[clientId] = CLIENT_ID
+      it[roleCode] = "admin"
+      it[roleName] = "管理员"
+      it[description] = null
+      it[isPreset] = true
+      it[status] = 1
+      it[createdAt] = t0
+      it[updatedAt] = t0
+    }
+    SysMenuTable.insert { // root：parent=零值 sentinel
+      it[id] = MENU_ROOT
+      it[clientId] = CLIENT_ID
+      it[parentId] = ZERO_UUID
+      it[title] = "工作台"
+      it[type] = 1
+      it[path] = "/dashboard"
+      it[component] = null
+      it[perms] = null
+      it[icon] = null
+      it[sortOrder] = 1
+      it[status] = 1
+      it[createdAt] = t0
+    }
+    SysMenuTable.insert { // child：parent=MENU_ROOT（在授权集合）
+      it[id] = MENU_CHILD
+      it[clientId] = CLIENT_ID
+      it[parentId] = MENU_ROOT
+      it[title] = "数据看板"
+      it[type] = 2
+      it[path] = "/dashboard/data"
+      it[component] = null
+      it[perms] = null
+      it[icon] = null
+      it[sortOrder] = 2
+      it[status] = 1
+      it[createdAt] = t0
+    }
+    SysMenuTable.insert { // 真·孤儿：授权后 parent 不在授权集合 → 仍当 root，parentId 原样回显
+      it[id] = MENU_ORPHAN_CHILD
+      it[clientId] = CLIENT_ID
+      it[parentId] = ORPHAN_PARENT
+      it[title] = "孤儿页"
+      it[type] = 2
+      it[path] = "/orphan"
+      it[component] = null
+      it[perms] = null
+      it[icon] = null
+      it[sortOrder] = 0
+      it[status] = 1
+      it[createdAt] = t0
+    }
+    SysMenuTable.insert { // 另一 client 的菜单（分组用）
+      it[id] = MENU_OTHER_CLIENT
+      it[clientId] = SECOND_CLIENT_ID
+      it[parentId] = ZERO_UUID
+      it[title] = "他端菜单"
+      it[type] = 1
+      it[path] = "/other"
+      it[component] = null
+      it[perms] = null
+      it[icon] = null
+      it[sortOrder] = 1
+      it[status] = 1
+      it[createdAt] = t0
+    }
+    SysRoleMenuTable.insert {
+      it[roleId] = ROLE1
+      it[menuId] = MENU_ROOT
+    }
+    SysRoleMenuTable.insert {
+      it[roleId] = ROLE1
+      it[menuId] = MENU_CHILD
+    }
+    SysRoleMenuTable.insert {
+      it[roleId] = ROLE1
+      it[menuId] = MENU_OTHER_CLIENT
+    }
+    // MENU_ORPHAN_CHILD 默认不授权（孤儿用例测试内直插授权行，避免污染其他用例默认形状）
   }
 
   private suspend fun seedClients(t0: java.time.OffsetDateTime) {
