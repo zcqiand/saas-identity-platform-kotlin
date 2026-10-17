@@ -4,8 +4,10 @@ import io.ktor.server.routing.RoutingCall
 import java.time.OffsetDateTime
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.firstOrNull
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
@@ -65,8 +67,77 @@ class OauthApiServiceImpl(
     return OAuthAuthorize200Response(code = code, state = authorizeCodeRequest.state)
   }
 
-  override suspend fun oAuthToken(tokenRequest: TokenRequest, call: RoutingCall): TokenResponse =
-      TODO("Task 7/8")
+  override suspend fun oAuthToken(tokenRequest: TokenRequest, call: RoutingCall): TokenResponse {
+    val client =
+        suspendTransaction(db) {
+          OauthClientTable.selectAll()
+              .where { OauthClientTable.clientId eq tokenRequest.clientId }
+              .firstOrNull()
+        } ?: throw BadRequestError("INVALID_CLIENT: unknown client_id")
+    return when (tokenRequest.grantType) {
+      TokenRequest.GrantType.authorization_code -> exchangeAuthorizationCode(tokenRequest)
+      TokenRequest.GrantType.refresh_token -> rotateRefreshToken(tokenRequest)
+    }
+  }
+
+  private suspend fun exchangeAuthorizationCode(req: TokenRequest): TokenResponse {
+    val code =
+        req.code
+            ?: throw BadRequestError(
+                "INVALID_REQUEST: code required for grantType=authorization_code"
+            )
+    val redirectUri =
+        req.redirectUri
+            ?: throw BadRequestError(
+                "INVALID_REQUEST: redirectUri required for grantType=authorization_code",
+            )
+    val row =
+        suspendTransaction(db) {
+          OauthCodeTable.selectAll()
+              .where { (OauthCodeTable.code eq code) and (OauthCodeTable.clientId eq req.clientId) }
+              .firstOrNull()
+        } ?: throw BadRequestError("INVALID_GRANT: code 不存在或已被使用")
+    if (row[OauthCodeTable.expiresAt] < OffsetDateTime.now()) {
+      deleteCode(code)
+      throw BadRequestError("INVALID_GRANT: expired code")
+    }
+    if (redirectUri != row[OauthCodeTable.redirectUri]) {
+      deleteCode(code)
+      throw BadRequestError("INVALID_GRANT: redirectUri mismatch")
+    }
+    val userId = row[OauthCodeTable.userId]
+    val tenantId = row[OauthCodeTable.tenantId]
+    val scope = row[OauthCodeTable.scope]
+    deleteCode(code) // 一次性消费防重放
+    return issueTokenResponse(userId, tenantId, req.clientId, scope)
+  }
+
+  private suspend fun deleteCode(code: String) {
+    suspendTransaction(db) { OauthCodeTable.deleteWhere { OauthCodeTable.code eq code } }
+  }
+
+  private suspend fun issueTokenResponse(
+      userId: Uuid,
+      tenantId: Uuid,
+      clientId: String,
+      rawScope: String?,
+  ): TokenResponse {
+    val refresh = tokenPair.persist(userId, tenantId, clientId, rawScope)
+    return TokenResponse(
+        accessToken = jwt.issueAccessToken(userId, tenantId),
+        refreshToken = refresh,
+        tokenType = "Bearer",
+        expiresIn = jwt.ttlSeconds.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+        // msw oracle 语义：scope 空格分隔（RFC 6749 §3.3），库列 csv
+        scope = rawScope?.replace(",", " ")?.trim()?.ifEmpty { null },
+        userId = userId.toString(),
+        clientId = clientId,
+        tenantId = tenantId,
+    )
+  }
+
+  /** Task 8 实现 refresh rotate；when 分支完备（枚举仅两 grant），此处占位满足编译。 */
+  private suspend fun rotateRefreshToken(req: TokenRequest): TokenResponse = TODO("Task 8")
 
   companion object {
     const val CODE_TTL_MINUTES = 5L

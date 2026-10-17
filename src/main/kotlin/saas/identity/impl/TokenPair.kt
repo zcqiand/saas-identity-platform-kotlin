@@ -17,7 +17,12 @@ import saas.identity.entity.OauthRefreshTokenTable
  */
 class TokenPair(private val db: R2dbcDatabase) {
 
-  suspend fun persist(userId: Uuid, tenantId: Uuid, clientId: String): String {
+  suspend fun persist(
+      userId: Uuid,
+      tenantId: Uuid,
+      clientId: String,
+      scope: String? = null,
+  ): String {
     val known =
         suspendTransaction(db) {
           OauthClientTable.selectAll().where { OauthClientTable.clientId eq clientId }.count() > 0
@@ -33,7 +38,8 @@ class TokenPair(private val db: R2dbcDatabase) {
         st[OauthAccessTokenTable.clientId] = clientId
         st[OauthAccessTokenTable.userId] = userId
         st[OauthAccessTokenTable.tenantId] = tenantId
-        st[scope] = null
+        // 参数 scope 遮蔽同名列——insert lambda 的 receiver 是表，列须全限定（T3 同款坑）
+        st[OauthAccessTokenTable.scope] = scope
         st[tokenType] = "Bearer"
         st[expiresAt] = now.plusSeconds(ACCESS_TTL_SECONDS)
         st[revoked] = false
