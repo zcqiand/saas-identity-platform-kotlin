@@ -11,8 +11,11 @@ import org.jetbrains.exposed.v1.r2dbc.deleteWhere
 import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.r2dbc.update
+import saas.identity.entity.OauthAccessTokenTable
 import saas.identity.entity.OauthClientTable
 import saas.identity.entity.OauthCodeTable
+import saas.identity.entity.OauthRefreshTokenTable
 import saas.identity.shared.api.OauthApiDelegate
 import saas.identity.shared.models.AuthorizeCodeRequest
 import saas.identity.shared.models.OAuthAuthorize200Response
@@ -136,8 +139,46 @@ class OauthApiServiceImpl(
     )
   }
 
-  /** Task 8 实现 refresh rotate；when 分支完备（枚举仅两 grant），此处占位满足编译。 */
-  private suspend fun rotateRefreshToken(req: TokenRequest): TokenResponse = TODO("Task 8")
+  /** refresh rotate：撤旧签新；client_id 以旧 rt 行绑定值为准不信任请求体（springboot 参照）。 */
+  private suspend fun rotateRefreshToken(req: TokenRequest): TokenResponse {
+    val rtValue =
+        req.refreshToken
+            ?: throw BadRequestError(
+                "INVALID_REQUEST: refreshToken required for grantType=refresh_token",
+            )
+    val rt =
+        suspendTransaction(db) {
+          OauthRefreshTokenTable.selectAll()
+              .where { OauthRefreshTokenTable.refreshToken eq rtValue }
+              .firstOrNull()
+        } ?: throw BadRequestError("INVALID_GRANT: refreshToken 不存在或已被使用")
+    if (rt[OauthRefreshTokenTable.revoked]) {
+      throw BadRequestError("INVALID_GRANT: revoked refresh_token")
+    }
+    // 列 nullable（DB-First 真源），但本服务签出的 rt 行恒带绑定——缺失属数据损坏，fail-fast 不兜底
+    val userId =
+        rt[OauthRefreshTokenTable.userId]
+            ?: throw BadRequestError("INVALID_GRANT: refresh_token row missing user binding")
+    val tenantId =
+        rt[OauthRefreshTokenTable.tenantId]
+            ?: throw BadRequestError("INVALID_GRANT: refresh_token row missing tenant binding")
+    suspendTransaction(db) {
+      OauthRefreshTokenTable.update({
+        OauthRefreshTokenTable.id eq rt[OauthRefreshTokenTable.id]
+      }) {
+        it[revoked] = true
+      }
+    }
+    val clientId = rt[OauthRefreshTokenTable.clientId]
+    val scope =
+        suspendTransaction(db) {
+          OauthAccessTokenTable.selectAll()
+              .where { OauthAccessTokenTable.id eq rt[OauthRefreshTokenTable.accessTokenId] }
+              .firstOrNull()
+              ?.get(OauthAccessTokenTable.scope)
+        }
+    return issueTokenResponse(userId, tenantId, clientId, scope)
+  }
 
   companion object {
     const val CODE_TTL_MINUTES = 5L

@@ -357,6 +357,107 @@ class OauthApiTest {
     assertEquals(HttpStatusCode.BadRequest, resp.status)
   }
 
+  /** rotate 族（M04.F03.I02；fastapi oauth_impl.py refresh 镜像——撤旧签新，client 归属钉 rt 行）。 */
+  private suspend fun rotate(refreshToken: String, clientId: String = "saas-console"): Reply =
+      runBlocking {
+        exchangeToken(
+            null,
+            """{"grantType":"refresh_token","clientId":"$clientId","refreshToken":"$refreshToken"}""",
+        )
+      }
+
+  /** authorize→exchange 全链路拿 rt1。 */
+  private suspend fun exchangedRefresh(scope: String = "read write"): Pair<String, String> {
+    val code = runBlocking { issueCode(scope = scope) }
+    val resp = runBlocking {
+      exchangeToken(
+          null,
+          """{"grantType":"authorization_code","clientId":"saas-console",""" +
+              """"code":"$code","redirectUri":"$redirect"}""",
+      )
+    }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    return Pair(
+        obj["refreshToken"]!!.jsonPrimitive.content,
+        obj["accessToken"]!!.jsonPrimitive.content,
+    )
+  }
+
+  /** rotate 撤旧签新：rt2≠rt1、新 JWT 可验签、DB 旧行 revoked=true 新行 false。 */
+  @Test
+  @Fn(["M04.F03.I02"])
+  fun tokenRefreshRotatesAndRevokesOld() {
+    val (rt1, _) = runBlocking { exchangedRefresh() }
+    val resp = runBlocking { rotate(rt1) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    val rt2 = obj["refreshToken"]!!.jsonPrimitive.content
+    assertTrue(rt2 != rt1)
+    val claims = jwt.decode(obj["accessToken"]!!.jsonPrimitive.content)
+    assertEquals(ScratchDb.ALICE.toString(), claims.subject)
+    val rtRows = runBlocking {
+      suspendTransaction(db) {
+        saas.identity.entity.OauthRefreshTokenTable.selectAll().toList().associate {
+          it[saas.identity.entity.OauthRefreshTokenTable.refreshToken] to
+              it[saas.identity.entity.OauthRefreshTokenTable.revoked]
+        }
+      }
+    }
+    assertEquals(true, rtRows[rt1])
+    assertEquals(false, rtRows[rt2])
+  }
+
+  /** 已撤销 rt1 复用 → 400 INVALID_GRANT。 */
+  @Test
+  @Fn(["M04.F03.I02"])
+  fun tokenRotatedOldRefreshIs400() {
+    val (rt1, _) = runBlocking { exchangedRefresh() }
+    assertEquals(HttpStatusCode.OK, runBlocking { rotate(rt1) }.status)
+    val replay = runBlocking { rotate(rt1) }
+    assertEquals(HttpStatusCode.BadRequest, replay.status)
+    assertTrue(replay.body.contains("INVALID_GRANT"))
+  }
+
+  /** client 归属钉旧 rt 行绑定值：请求体塞 second-app 也回 saas-console。 */
+  @Test
+  @Fn(["M04.F03.I02"])
+  fun tokenRotateClientIdFromRtRowNotRequestBody() {
+    val (rt1, _) = runBlocking { exchangedRefresh() }
+    val resp = runBlocking { rotate(rt1, clientId = "second-app") }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    assertEquals("saas-console", obj["clientId"]!!.jsonPrimitive.content)
+    val rt2 = obj["refreshToken"]!!.jsonPrimitive.content
+    val newClient = runBlocking {
+      suspendTransaction(db) {
+        saas.identity.entity.OauthRefreshTokenTable.selectAll()
+            .where { saas.identity.entity.OauthRefreshTokenTable.refreshToken eq rt2 }
+            .singleOrNull()
+            ?.get(saas.identity.entity.OauthRefreshTokenTable.clientId)
+      }
+    }
+    assertEquals("saas-console", newClient)
+  }
+
+  /** 未知 rt → 400。 */
+  @Test
+  fun tokenRotateUnknownRefreshIs400() {
+    val resp = runBlocking { rotate("rt_nonexistent") }
+    assertEquals(HttpStatusCode.BadRequest, resp.status)
+    assertTrue(resp.body.contains("INVALID_GRANT"))
+  }
+
+  /** scope 从旧 rt 关联 access 行携带到新对。 */
+  @Test
+  fun tokenRotateScopeCarriedFromAccessRow() {
+    val (rt1, _) = runBlocking { exchangedRefresh(scope = "read write") }
+    val resp = runBlocking { rotate(rt1) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    assertEquals("read write", obj["scope"]!!.jsonPrimitive.content)
+  }
+
   /** state 原样回显（空串/特殊字符）。 */
   @Test
   fun authorizeStateAlwaysEchoed() {
