@@ -26,7 +26,6 @@ import saas.identity.shared.models.LoginRequest
 import saas.identity.shared.models.LoginResponse
 import saas.identity.shared.models.SysUser
 import saas.identity.shared.models.SysUserStatus
-import saas.identity.shared.models.TenantMemberStatus
 import saas.identity.shared.models.TenantMembership
 
 /**
@@ -200,15 +199,7 @@ class AuthApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssu
         else -> SysUserStatus.disabled
       }
 
-  // 同族兜底一致（status==1 显式支；else 支纯镜像防御，登录路径不可达）
-  private fun memberStatusFromDb(value: Short): TenantMemberStatus =
-      when (value.toInt()) {
-        STATUS_ACTIVE.toInt() -> TenantMemberStatus.active
-        2 -> TenantMemberStatus.invited
-        STATUS_SUSPENDED -> TenantMemberStatus.suspended
-        0 -> TenantMemberStatus.disabled
-        else -> TenantMemberStatus.disabled
-      }
+  // memberStatusFromDb 已提升为共享 internal（Security.kt，Phase 6 T3——me 族与登录链共用防漂移）
 
   companion object {
     const val LOCKOUT_THRESHOLD = 5
@@ -216,7 +207,6 @@ class AuthApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssu
     // springboot 登录响应字面 3600（JWT exp 本身走 TTL），家族口径
     const val LOGIN_EXPIRES_IN = 3600
     const val STATUS_ACTIVE: Short = 1
-    const val STATUS_SUSPENDED = 3
   }
 }
 

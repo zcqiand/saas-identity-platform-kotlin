@@ -23,9 +23,11 @@ import saas.identity.impl.ForbiddenError
 import saas.identity.impl.InvalidCredentialsError
 import saas.identity.impl.JwtIssuer
 import saas.identity.impl.LockedAccountError
+import saas.identity.impl.MeApiServiceImpl
 import saas.identity.impl.NotFoundError
 import saas.identity.shared.api.AdminTenantsApi
 import saas.identity.shared.api.AuthApi
+import saas.identity.shared.api.MeApi
 import saas.identity.shared.infrastructure.AppDelegates
 import saas.identity.shared.infrastructure.BadParameterException
 import saas.identity.shared.infrastructure.delegates
@@ -91,6 +93,7 @@ fun Application.harnessModule(cfg: AppConfig) {
       AppDelegates(
           authApiDelegate = AuthApiServiceImpl(db, jwt),
           adminTenantsApiDelegate = AdminTenantsApiServiceImpl(db, jwt),
+          meApiDelegate = MeApiServiceImpl(db, jwt),
       )
   )
   routing {
@@ -100,6 +103,7 @@ fun Application.harnessModule(cfg: AppConfig) {
     }
     AuthApi()
     AdminTenantsApi()
+    MeApi()
   }
 }
 
