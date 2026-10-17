@@ -10,6 +10,7 @@ import org.jetbrains.exposed.v1.r2dbc.insert
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import saas.identity.entity.OauthAccessTokenTable
 import saas.identity.entity.OauthClientTable
+import saas.identity.entity.OauthCodeTable
 import saas.identity.entity.OauthRefreshTokenTable
 import saas.identity.entity.SysMenuTable
 import saas.identity.entity.SysRoleMenuTable
@@ -110,6 +111,7 @@ object ScratchDb {
           OauthClientTable,
           OauthAccessTokenTable,
           OauthRefreshTokenTable,
+          OauthCodeTable,
           SysRoleTable,
           SysMenuTable,
           SysRoleMenuTable,
