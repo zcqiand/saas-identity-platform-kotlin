@@ -10,13 +10,18 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import org.jetbrains.exposed.v1.core.and
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
 import org.jetbrains.exposed.v1.r2dbc.insert
+import org.jetbrains.exposed.v1.r2dbc.selectAll
 import org.jetbrains.exposed.v1.r2dbc.transactions.suspendTransaction
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,6 +32,8 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import saas.identity.entity.SysMenuTable
 import saas.identity.entity.SysRoleMenuTable
+import saas.identity.entity.SysRoleTable
+import saas.identity.entity.TenantMemberRoleTable
 import saas.identity.entity.TenantMemberTable
 import saas.identity.impl.JwtIssuer
 
@@ -449,5 +456,83 @@ class MeApiTest {
       )
     }
     assertEquals(HttpStatusCode.Unauthorized, empty.status)
+  }
+
+  /** 终审 I1 钉：坏 Bearer（签名不符/过期）→ 401 非 500（fastapi security.py PyJWTError 收敛镜像）。 */
+  @Test
+  fun meTamperedBearerTokenIs401Not500() {
+    val tampered = runBlocking { loginToken("alice") } + "x"
+    val resp = withApp { client ->
+      Reply(
+          client.get("/api/v1/me") { header("Authorization", "Bearer $tampered") }.status,
+          "",
+      )
+    }
+    assertEquals(HttpStatusCode.Unauthorized, resp.status)
+  }
+
+  /** 终审 I2 钉（Review Focus #5）：whoami 未知用户（无 member 行）→ 200 空 memberships 不崩（firstOrNull 守卫）。 */
+  @Test
+  fun whoamiUnknownUserReturns200EmptyMemberships() {
+    val stranger = Uuid.random()
+    val token = jwt.issueAccessToken(stranger, ScratchDb.TENANT1)
+    val resp = withApp { client ->
+      val r = client.get("/api/v1/me") { header("Authorization", "Bearer $token") }
+      Reply(r.status, r.bodyAsText())
+    }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    assertEquals(0, obj["memberships"]!!.jsonArray.size)
+    // claim 优先：空 memberships 时 currentTenantId 仍取 claim（真 null 分支=无 claim，HTTP 不可复现，缺口在案）
+    assertEquals(ScratchDb.TENANT1.toString(), obj["currentTenantId"]!!.jsonPrimitive.content)
+  }
+
+  /** 终审 I2 钉（Review Focus #4）：member 在但无角色 → {}（TenantMemberRoleTable 无行分支）。 */
+  @Test
+  fun menusMemberWithoutRolesReturnsEmptyMap() {
+    val roleless = Uuid.random()
+    runBlocking { insertMember(Uuid.random(), ScratchDb.TENANT1, roleless, 1) }
+    val resp = runBlocking { getMenus(jwt.issueAccessToken(roleless, ScratchDb.TENANT1)) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    assertEquals(0, Json.parseToJsonElement(resp.body).jsonObject.size)
+  }
+
+  /** 终审 I2 钉（Review Focus #4）：角色在但无菜单授权 → {}（SysRoleMenuTable 无行分支）。 */
+  @Test
+  fun menusRoleWithoutMenuGrantsReturnsEmptyMap() {
+    val granted = Uuid.random()
+    val bareRole = Uuid.random()
+    runBlocking {
+      insertMember(Uuid.random(), ScratchDb.TENANT1, granted, 1)
+      suspendTransaction(db) {
+        val grantedMemberId =
+            saas.identity.entity.TenantMemberTable.selectAll()
+                .where {
+                  (saas.identity.entity.TenantMemberTable.userId eq granted) and
+                      (saas.identity.entity.TenantMemberTable.tenantId eq ScratchDb.TENANT1)
+                }
+                .toList()
+                .first()[saas.identity.entity.TenantMemberTable.id]
+        SysRoleTable.insert {
+          it[id] = bareRole
+          it[tenantId] = ScratchDb.TENANT1
+          it[clientId] = ScratchDb.CLIENT_ID
+          it[roleCode] = "bare"
+          it[roleName] = "无授权角色"
+          it[description] = null
+          it[isPreset] = false
+          it[status] = 1
+          it[createdAt] = java.time.OffsetDateTime.parse("2026-06-01T00:00:00+00:00")
+          it[updatedAt] = java.time.OffsetDateTime.parse("2026-06-01T00:00:00+00:00")
+        }
+        TenantMemberRoleTable.insert {
+          it[memberId] = grantedMemberId
+          it[roleId] = bareRole
+        }
+      }
+    }
+    val resp = runBlocking { getMenus(jwt.issueAccessToken(granted, ScratchDb.TENANT1)) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    assertEquals(0, Json.parseToJsonElement(resp.body).jsonObject.size)
   }
 }

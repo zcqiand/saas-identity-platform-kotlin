@@ -7,7 +7,7 @@ import saas.identity.shared.models.TenantMemberStatus
 
 /** me/oauth/admin 族共享安全面（fastapi security.py / oauth_impl 镜像，Phase 6）。 */
 
-/** Bearer 提取 + 验签：无头/非 Bearer 前缀/空串 → InvalidCredentialsError（401）。 */
+/** Bearer 提取 + 验签：无头/非 Bearer 前缀/空串/坏 token（过期·坏签名·格式错）→ InvalidCredentialsError（401）。 */
 fun requireBearer(call: RoutingCall, jwt: JwtIssuer): Claims {
   val header = call.request.headers["Authorization"]
   if (header == null || !header.startsWith("Bearer ")) {
@@ -15,7 +15,9 @@ fun requireBearer(call: RoutingCall, jwt: JwtIssuer): Claims {
   }
   val token = header.substring("Bearer ".length).trim()
   if (token.isEmpty()) throw InvalidCredentialsError("Bearer token required")
-  return jwt.decode(token)
+  // 一切验签失败收敛 401（fastapi security.py PyJWTError → InvalidCredentialsError 镜像；终审 I1）
+  return runCatching { jwt.decode(token) }
+      .getOrElse { throw InvalidCredentialsError("invalid bearer token") }
 }
 
 /** fastapi uuid_or_none 镜像：坏 UUID 归 null（不抛），调用方按 op 语义转 400/401/空。 */

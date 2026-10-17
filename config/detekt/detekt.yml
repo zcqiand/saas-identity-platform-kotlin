@@ -15,4 +15,8 @@ complexity:
 style:
   ThrowsCount:
     active: true
-    excludes: ['**/OauthApiServiceImpl.kt'] # oauth 错误映射每个 guard 一个 throw，与 fastapi mirror 逐分支对齐——分支数=协议错误面本身（Phase 6 T9）
+    excludes:
+      [
+        '**/OauthApiServiceImpl.kt', # oauth 错误映射每个 guard 一个 throw，与 fastapi mirror 逐分支对齐——分支数=协议错误面本身（Phase 6 T9）
+        '**/Security.kt', # requireBearer 三道守卫（无头/空串/坏 token）各一 throw，同 fastapi security.py 逐分支镜像（Phase 6 终审 I1）
+      ]
