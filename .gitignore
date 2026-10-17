@@ -10,3 +10,7 @@ build/
 
 # openapi-generator 临时目录（gen-shared.sh 中转，2026-10-15 Phase 2 收尾补登记）
 .openapi-tmp/
+
+# kotlin 编译产物镜像（Eclipse/Kotlin 插件生成，2026-10-17 T2 误提交纠正）
+bin/
+.kotlin/

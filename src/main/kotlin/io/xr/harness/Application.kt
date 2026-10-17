@@ -16,12 +16,15 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.get
 import io.ktor.server.routing.routing
 import org.jetbrains.exposed.v1.r2dbc.R2dbcDatabase
+import saas.identity.impl.AdminTenantsApiServiceImpl
 import saas.identity.impl.AuthApiServiceImpl
 import saas.identity.impl.BadRequestError
 import saas.identity.impl.ForbiddenError
 import saas.identity.impl.InvalidCredentialsError
 import saas.identity.impl.JwtIssuer
 import saas.identity.impl.LockedAccountError
+import saas.identity.impl.NotFoundError
+import saas.identity.shared.api.AdminTenantsApi
 import saas.identity.shared.api.AuthApi
 import saas.identity.shared.infrastructure.AppDelegates
 import saas.identity.shared.infrastructure.BadParameterException
@@ -71,6 +74,12 @@ fun Application.harnessModule(cfg: AppConfig) {
           ErrorResponse(code = "BAD_REQUEST", message = "malformed request body"),
       )
     }
+    exception<NotFoundError> { call, cause ->
+      call.respond(
+          HttpStatusCode.NotFound,
+          ErrorResponse(code = "NOT_FOUND", message = cause.message ?: "not found"),
+      )
+    }
     exception<Throwable> { call, _ ->
       call.respond(
           HttpStatusCode.InternalServerError,
@@ -78,13 +87,19 @@ fun Application.harnessModule(cfg: AppConfig) {
       )
     }
   }
-  delegates(AppDelegates(authApiDelegate = AuthApiServiceImpl(db, jwt)))
+  delegates(
+      AppDelegates(
+          authApiDelegate = AuthApiServiceImpl(db, jwt),
+          adminTenantsApiDelegate = AdminTenantsApiServiceImpl(db, jwt),
+      )
+  )
   routing {
     // 家族探活契约形状：GET /health → {"ok":true,"mode":"ktor"}。
     get("/health") {
       call.respondText("""{"ok":true,"mode":"ktor"}""", ContentType.Application.Json)
     }
     AuthApi()
+    AdminTenantsApi()
   }
 }
 

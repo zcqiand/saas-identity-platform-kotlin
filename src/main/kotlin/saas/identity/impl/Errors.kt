@@ -11,3 +11,6 @@ class LockedAccountError(val lockedUntil: OffsetDateTime) :
 class ForbiddenError(message: String) : RuntimeException(message)
 
 class BadRequestError(message: String) : RuntimeException(message)
+
+/** switch-tenant/资源不存在 404 族（fastapi errors.py NotFoundError 镜像，Phase 6 扩面）。 */
+class NotFoundError(message: String) : RuntimeException(message)
