@@ -1,13 +1,23 @@
 {
   "schema": 1,
   "project": "saas-identity-platform-kotlin",
-  "current_task": "项目已初始化，等待第一个需求",
-  "done": ["脚手架生成，门禁全绿"],
-  "next": "跑 /req <需求原话> 落第一份需求文档，同时把 docs/functions/function-tree.md 填成真实功能清单",
+  "current_task": "M01.F04 登录全链交付（Phase 3/4，route 缝委托 + scratch 真库）——等待下一域需求",
+  "done": [
+    "脚手架生成，门禁全绿",
+    "Phase 1-3 codegen 接线/delegatePattern route 缝（ADR-0045/0047）；L4_DB_INJECT_REPOS 入表（scratch 真库姿态）",
+    "M01.F04.I01 密码登录全链：锁定 423/订阅过滤/token 对落库/HS256（e958a83）；I06 logout（本仓 sessions_logout 镜像）",
+    "Phase 4 终审批：域外 status 兜底 disabled + iso UTC 归一 + status=1 active 支（831a4a5/b08847f）"
+  ],
+  "next": [
+    "push（人批后）",
+    "IdP 出站面镜像登记 + 逐域开发：oauth/token、whoami、my/tenants、my/menus、platform-tenants + 用户/租户/oauth-clients/菜单/权限管理域（ID 在 saas shared SSOT）",
+    "树上 M01/M01.F01 待填；F04 GA 翻转走 mirror 免批",
+    "live CT 缺 ktor target（5109 未入 targets.ts）+ deploy 链五件套未建"
+  ],
   "open_questions": [],
   "dont": [
     "不要改 .harness/stack.json 让门变松",
     "不要给 skip 的测试挂功能 ID"
   ],
-  "last_gate_passed_at": null
+  "last_gate_passed_at": "2026-10-17"
 }
