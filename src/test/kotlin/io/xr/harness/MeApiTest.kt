@@ -302,7 +302,10 @@ class MeApiTest {
     Reply(builder.status, builder.bodyAsText())
   }
 
-  /** 四跳 join：member→role→menu→rows，按 clientId 分组组树；root 层 parentId 零值原样回显（Ruling 非空契约）。 */
+  /**
+   * 四跳 join：member→role→menu→rows，按 clientId 分组组树；root 层 parentId 零值 sentinel → wire null（5.112①
+   * 契约修正）。
+   */
   @Test
   @Fn(["M04.F04.I08"])
   fun menusGroupsByClientAndBuildsTree() {
@@ -314,7 +317,7 @@ class MeApiTest {
     assertEquals(1, console.size)
     val root = console[0].jsonObject
     assertEquals(ScratchDb.MENU_ROOT.toString(), root["id"]!!.jsonPrimitive.content)
-    assertEquals(ScratchDb.ZERO_UUID.toString(), root["parentId"]!!.jsonPrimitive.content)
+    assertEquals(kotlinx.serialization.json.JsonNull, root["parentId"])
     assertEquals("directory", root["type"]!!.jsonPrimitive.content)
     assertEquals(
         listOf(ScratchDb.MENU_CHILD.toString()),
@@ -392,7 +395,35 @@ class MeApiTest {
     )
   }
 
-  /** 孤儿：授权但 parent 不在授权集合 → 仍当 root，parentId 原样回显（非空契约 Ruling）。 */
+  /** 根 sentinel（DB 零值 parent_id）→ wire parentId=null（契约 5.112① 修正：required+nullable，四后端实测口径）。 */
+  @Test
+  @Fn(["M04.F04.I08"])
+  fun menusRootSentinelSerializesNullParentId() {
+    val token = runBlocking { loginToken("alice") }
+    val resp = runBlocking { getMenus(token) }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val console = Json.parseToJsonElement(resp.body).jsonObject["saas-console"]!!.jsonArray
+    val root = console.first {
+      it.jsonObject["id"]!!.jsonPrimitive.content == ScratchDb.MENU_ROOT.toString()
+    }
+    assertEquals(
+        kotlinx.serialization.json.JsonNull,
+        root.jsonObject["parentId"],
+    )
+    // 非 sentinel parent（子页）不受影响：照常回显
+    val child =
+        console
+            .first { it.jsonObject["id"]!!.jsonPrimitive.content == ScratchDb.MENU_ROOT.toString() }
+            .jsonObject["children"]!!
+            .jsonArray
+            .first()
+    assertEquals(
+        ScratchDb.MENU_ROOT.toString(),
+        child.jsonObject["parentId"]!!.jsonPrimitive.content,
+    )
+  }
+
+  /** 孤儿：授权但 parent 不在授权集合 → 仍当 root，parentId 原样回显（5.112① 后仅零值 sentinel 归 null，孤儿不受影响）。 */
   @Test
   @Fn(["M04.F04.I08"])
   fun menusOrphanParentStillRootWithEchoedParentId() {

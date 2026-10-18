@@ -33,7 +33,7 @@ import saas.identity.shared.infrastructure.BadParameterException
 data class EffectiveMenuNode(
     val id: kotlin.uuid.Uuid,
     val clientId: kotlin.String,
-    val parentId: kotlin.uuid.Uuid,
+    val parentId: kotlin.uuid.Uuid?,
     val title: kotlin.String,
     val type: SysMenuType,
     val sortOrder: kotlin.Int,

@@ -171,7 +171,8 @@ class MeApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssuer
 /**
  * 组树：parent 在授权集合内 → 挂 children，否则（含孤儿/零值 sentinel/自指）当 root。生成 EffectiveMenuNode.children 是不可变
  * List——plan 的 parent.children.add 编不过，改局部 mutable map + copy 递归填充。children
- * 保持装载序不重排；只排根层（me_impl.py:307-311 镜像）。
+ * 保持装载序不重排；只排根层（me_impl.py:307-311 镜像）。wire parentId：根 sentinel（零 UUID）→ null（2026-10-18
+ * 人批契约修正，tracker 5.112①；孤儿原样回显仍当 root）。
  */
 private fun buildMenuTree(rows: List<ResultRow>): List<EffectiveMenuNode> {
   val nodes = rows.associate { row ->
@@ -179,8 +180,7 @@ private fun buildMenuTree(rows: List<ResultRow>): List<EffectiveMenuNode> {
         EffectiveMenuNode(
             id = row[SysMenuTable.id],
             clientId = row[SysMenuTable.clientId],
-            // 非空契约 Ruling：参考吐 null 的场景此处零值/孤儿 parent 原样回显（tracker 5.112 候选）
-            parentId = row[SysMenuTable.parentId],
+            parentId = row[SysMenuTable.parentId].takeUnless { it == MENU_ROOT_SENTINEL },
             title = row[SysMenuTable.title],
             type = sysMenuTypeFromDb(row[SysMenuTable.type]),
             sortOrder = row[SysMenuTable.sortOrder],
@@ -205,6 +205,9 @@ private fun buildMenuTree(rows: List<ResultRow>): List<EffectiveMenuNode> {
 
   return roots.sortedBy { it.sortOrder }.map { fill(it) }
 }
+
+// sys_menu.parent_id 根 sentinel（DB 零值 UUID → wire null；fastapi me_impl zero_uuid 镜像）
+private val MENU_ROOT_SENTINEL = Uuid.parse("00000000-0000-0000-0000-000000000000")
 
 /** 1=directory / 3=button / 2 与未知=menu（menus_impl.py:55-60 镜像；Short 列型按家族 when(toInt()) 口径）。 */
 internal fun sysMenuTypeFromDb(value: Short): SysMenuType =
