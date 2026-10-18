@@ -1,6 +1,5 @@
 package saas.identity.impl
 
-import io.jsonwebtoken.Claims
 import io.ktor.server.routing.RoutingCall
 import java.time.OffsetDateTime
 import kotlin.uuid.Uuid
@@ -135,37 +134,44 @@ class MeApiServiceImpl(private val db: R2dbcDatabase, private val jwt: JwtIssuer
     )
   }
 
-  /** membership 全量行（无 status 过滤），固定序。 */
-  private suspend fun membersOf(userId: Uuid): List<TenantMembership> =
-      suspendTransaction(db) {
-            TenantMemberTable.selectAll()
-                .where { TenantMemberTable.userId eq userId }
-                .orderBy(
-                    TenantMemberTable.createdAt to SortOrder.ASC,
-                    TenantMemberTable.id to SortOrder.ASC,
-                )
-                .toList()
-          }
-          .map { toMembership(it) }
-
-  /** roleIds join 原样，不按 sys_role.tenant_id 过滤（家族 2026-09-12 教训）。 */
-  private suspend fun toMembership(row: ResultRow): TenantMembership =
+  /**
+   * membership 全量行（无 status 过滤），固定序。 roleIds 一把 inList 批查按 member 分组（终审 defer minor 收口：原逐 member
+   * 一事务 1+N）——join 原样，不按 sys_role.tenant_id 过滤（家族 2026-09-12 教训）。
+   */
+  private suspend fun membersOf(userId: Uuid): List<TenantMembership> {
+    val rows =
+        suspendTransaction(db) {
+          TenantMemberTable.selectAll()
+              .where { TenantMemberTable.userId eq userId }
+              .orderBy(
+                  TenantMemberTable.createdAt to SortOrder.ASC,
+                  TenantMemberTable.id to SortOrder.ASC,
+              )
+              .toList()
+        }
+    if (rows.isEmpty()) return emptyList()
+    val memberIds = rows.map { it[TenantMemberTable.id] }
+    val rolesByMember =
+        suspendTransaction(db) {
+              TenantMemberRoleTable.selectAll()
+                  .where { TenantMemberRoleTable.memberId inList memberIds }
+                  .toList()
+            }
+            .groupBy(
+                { it[TenantMemberRoleTable.memberId] },
+                { it[TenantMemberRoleTable.roleId].toString() },
+            )
+    return rows.map { row ->
       TenantMembership(
           id = row[TenantMemberTable.id],
           userId = row[TenantMemberTable.userId],
           tenantId = row[TenantMemberTable.tenantId],
-          roleIds = roleIdsOf(row[TenantMemberTable.id]),
+          roleIds = rolesByMember[row[TenantMemberTable.id]].orEmpty(),
           status = memberStatusFromDb(row[TenantMemberTable.status]),
           joinedAt = iso(row[TenantMemberTable.createdAt]),
       )
-
-  private suspend fun roleIdsOf(memberId: Uuid): List<String> =
-      suspendTransaction(db) {
-            TenantMemberRoleTable.selectAll()
-                .where { TenantMemberRoleTable.memberId eq memberId }
-                .toList()
-          }
-          .map { it[TenantMemberRoleTable.roleId].toString() }
+    }
+  }
 }
 
 /**
@@ -220,6 +226,3 @@ internal fun sysMenuTypeFromDb(value: Short): SysMenuType =
 // sys_menu.type 字典值（fastapi seed 与查询同语义；命名替代裸字面量）
 private const val MENU_TYPE_DIRECTORY = 1
 private const val MENU_TYPE_BUTTON = 3
-
-/** claims 取 subject 的共享收口（whoami/switch/menus 三处同语义）。 */
-internal fun Claims.subjectUuid(): Uuid? = uuidOrNull(subject)

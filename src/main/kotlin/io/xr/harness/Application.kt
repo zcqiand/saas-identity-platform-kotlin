@@ -72,10 +72,15 @@ fun main() {
 /** 错误只走异常映射（Review Focus 1：impl 永不直接 respond，防双 respond 崩）。 */
 private fun Application.installErrorMapping() {
   install(StatusPages) {
-    exception<InvalidCredentialsError> { call, _ ->
+    // message 透传（家族口径：springboot e.getMessage() / rails e.message / fastapi exc.message
+    // 全透传具体 message——5.112②③ 终审 defer minor 收口，kotlin 固定 "invalid credentials" 是超集漂移）
+    exception<InvalidCredentialsError> { call, cause ->
       call.respond(
           HttpStatusCode.Unauthorized,
-          ErrorResponse(code = "INVALID_CREDENTIALS", message = "invalid credentials"),
+          ErrorResponse(
+              code = "INVALID_CREDENTIALS",
+              message = cause.message ?: "invalid credentials",
+          ),
       )
     }
     // 423 空体（springboot body(null) 家族口径，LockedAccountResponse 契约模型未启用）

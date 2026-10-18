@@ -176,7 +176,9 @@ class OauthApiTest {
   /**
    * 真 claim-miss：合法签名 + 有 sub 但**无 tenant_id claim** → 401（5.112② 证据通道）。 该 token 必过
    * requireBearer（decode 成功），401 只能出自 oauth_impl 的 「JWT tenant_id claim
-   * required」分支（OauthApiServiceImpl:48-49）——分支互斥即证据。
+   * required」分支（OauthApiServiceImpl:48-49）——分支互斥即证据。 message 透传断言（5.112②③ 终审 defer minor
+   * 收口）：springboot e.getMessage() / rails e.message / fastapi exc.message 三 peer 全透传具体
+   * message，kotlin 收敛固定 "invalid credentials" 是超集漂移——对齐家族口径。
    */
   @Test
   @Fn(["M04.F03.I01"])
@@ -188,6 +190,12 @@ class OauthApiTest {
                 """"responseType":"code","state":"s"}""",
         )
     assertEquals(HttpStatusCode.Unauthorized, resp.status)
+    val err = Json.parseToJsonElement(resp.body).jsonObject
+    assertEquals("INVALID_CREDENTIALS", err["code"]!!.jsonPrimitive.content)
+    assertEquals(
+        "JWT tenant_id claim required for authorize",
+        err["message"]!!.jsonPrimitive.content,
+    )
     val rows = runBlocking { codeRows() }
     assertEquals(0, rows.size)
   }
