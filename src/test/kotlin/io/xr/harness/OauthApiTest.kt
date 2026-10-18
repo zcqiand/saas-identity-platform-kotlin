@@ -92,6 +92,26 @@ class OauthApiTest {
 
   private fun aliceToken(): String = jwt.issueAccessToken(ScratchDb.ALICE, ScratchDb.TENANT1)
 
+  /**
+   * 5.112② 证据通道：同签名/iss/aud、有 sub 但**不带 tenant_id claim** 的 token——生产签发器 恒带该
+   * claim（JwtIssuer.issueAccessToken），claim-miss 分支只能手工造形态经 HTTP 钉死。
+   */
+  private fun claimlessToken(userId: Uuid): String {
+    val epoch = System.currentTimeMillis()
+    return io.jsonwebtoken.Jwts.builder()
+        .issuer(cfg.jwtIssuer)
+        .audience()
+        .add(cfg.jwtAudience)
+        .and()
+        .subject(userId.toString())
+        .id(Uuid.random().toString())
+        .issuedAt(java.util.Date(epoch - 1000))
+        .notBefore(java.util.Date(epoch - 1000))
+        .expiration(java.util.Date(epoch + cfg.jwtTtlSeconds * 1000))
+        .signWith(javax.crypto.spec.SecretKeySpec(cfg.jwtSigningKey.toByteArray(), "HmacSHA256"))
+        .compact()
+  }
+
   private suspend fun codeRows(): List<org.jetbrains.exposed.v1.core.ResultRow> =
       suspendTransaction(db) { OauthCodeTable.selectAll().toList() }
 
@@ -140,10 +160,10 @@ class OauthApiTest {
     assertTrue(resp.body.contains("client_id"))
   }
 
-  /** 已知 client 但无 Bearer → 401。 */
+  /** 已知 client 但无 Bearer → 401（原误名 authorizeMissingTenantClaimIs401 拨正：没碰 claim 分支）。 */
   @Test
   @Fn(["M04.F03.I01"])
-  fun authorizeMissingTenantClaimIs401() {
+  fun authorizeMissingBearerIs401() {
     val resp =
         authorize(
             null,
@@ -151,6 +171,25 @@ class OauthApiTest {
                 """"responseType":"code","state":"s"}""",
         )
     assertEquals(HttpStatusCode.Unauthorized, resp.status)
+  }
+
+  /**
+   * 真 claim-miss：合法签名 + 有 sub 但**无 tenant_id claim** → 401（5.112② 证据通道）。 该 token 必过
+   * requireBearer（decode 成功），401 只能出自 oauth_impl 的 「JWT tenant_id claim
+   * required」分支（OauthApiServiceImpl:48-49）——分支互斥即证据。
+   */
+  @Test
+  @Fn(["M04.F03.I01"])
+  fun authorizeClaimlessTokenIs401() {
+    val resp =
+        authorize(
+            claimlessToken(ScratchDb.ALICE),
+            """{"clientId":"saas-console","redirectUri":"$redirect",""" +
+                """"responseType":"code","state":"s"}""",
+        )
+    assertEquals(HttpStatusCode.Unauthorized, resp.status)
+    val rows = runBlocking { codeRows() }
+    assertEquals(0, rows.size)
   }
 
   /** redirect 白名单：精确匹配 + 前缀+'?'（query 后缀）都收。 */

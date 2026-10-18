@@ -91,6 +91,26 @@ class MeApiTest {
     Json.parseToJsonElement(resp.bodyAsText()).jsonObject["accessToken"]!!.jsonPrimitive.content
   }
 
+  /**
+   * 5.112② 证据通道：同签名/iss/aud 但**不带 tenant_id claim** 的 token——生产签发器 恒带该
+   * claim（JwtIssuer.issueAccessToken），claim-miss 分支只能手工造形态经 HTTP 钉死。
+   */
+  private fun claimlessToken(userId: Uuid): String {
+    val epoch = System.currentTimeMillis()
+    return io.jsonwebtoken.Jwts.builder()
+        .issuer(cfg.jwtIssuer)
+        .audience()
+        .add(cfg.jwtAudience)
+        .and()
+        .subject(userId.toString())
+        .id(Uuid.random().toString())
+        .issuedAt(java.util.Date(epoch - 1000))
+        .notBefore(java.util.Date(epoch - 1000))
+        .expiration(java.util.Date(epoch + cfg.jwtTtlSeconds * 1000))
+        .signWith(javax.crypto.spec.SecretKeySpec(cfg.jwtSigningKey.toByteArray(), "HmacSHA256"))
+        .compact()
+  }
+
   private suspend fun insertMember(
       memberId: Uuid,
       tenantId: Uuid,
@@ -130,6 +150,22 @@ class MeApiTest {
     }
     assertTrue(t1.jsonObject["roleIds"]!!.jsonArray.toString().contains(ScratchDb.ROLE1.toString()))
     assertEquals("active", t1.jsonObject["status"]!!.jsonPrimitive.content)
+  }
+
+  /** claim miss（同签名无 tenant_id）→ 落首个 membership（5.112② 证据通道：签发器恒带 claim，手工造 miss 形态）。 */
+  @Test
+  @Fn(["M01.F01.I01"])
+  fun whoamiClaimlessTokenFallsBackToFirstMembership() {
+    val token = claimlessToken(ScratchDb.ALICE)
+    val resp = withApp { client ->
+      val r = client.get("/api/v1/me") { header("Authorization", "Bearer $token") }
+      Reply(r.status, r.bodyAsText())
+    }
+    assertEquals(HttpStatusCode.OK, resp.status)
+    val obj = Json.parseToJsonElement(resp.body).jsonObject
+    // token 无 tenant_id claim：currentTenantId 只能来自 memberships[0]（created_at ASC 定序）兜底
+    assertEquals(ScratchDb.TENANT1.toString(), obj["currentTenantId"]!!.jsonPrimitive.content)
+    assertEquals(2, obj["memberships"]!!.jsonArray.size)
   }
 
   /** 排序契约恒 created_at ASC + id ASC：T1 先 T2 后。 */
