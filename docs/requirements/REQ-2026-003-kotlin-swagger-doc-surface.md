@@ -5,7 +5,7 @@
 | 提出人 | zcqiand |
 | 提出日期 | 2026-10-25 |
 | 优先级 | P1 |
-| 状态 | 开发中（T-1..T-4 完成，T-5 首航待 tag push 人批） |
+| 状态 | 已完成（v0.2.0-20261025 首航全绿，2026-10-25） |
 | 关联 ADR | ADR-0045（依赖清单 ktor-bom 收口）；家族先例：springboot v0.1.13 springdoc 根跳转 / aspnetcore Swashbuckle `/swagger` 根跳转 |
 
 ## 1. 需求描述
@@ -60,8 +60,8 @@
 | T-2 | saas 仓：gen-shared.sh 落 openapi.yaml + webjar 依赖 + 路由/根跳转 + gate 全绿 | 代码 | Claude | — | 已完成（gradle 三件套 BUILD SUCCESSFUL） |
 | T-3 | lab 仓镜像同构 + gate 全绿 | 代码 | Claude | — | 已完成（gradle 三件套 BUILD SUCCESSFUL） |
 | T-4 | 两仓 CI smoke 补 swagger 文档面探针 | 代码 | Claude | — | 已完成 |
-| T-5 | 首航：tag push（外发动作，逐项确认）→ prod 探活（AC-5） | 验证 | Claude | — | 待开始 |
-| T-6 | 收账：家族档案（如需）、记忆指纹、suite gitlink | 文档 | Claude | — | 待开始 |
+| T-5 | 首航：tag push（外发动作，逐项确认）→ prod 探活（AC-5） | 验证 | Claude | — | 已完成（tag 人批 v0.2.0-20261025；CI 全绿；prod 双域四探针 302/200×3，openapi.yaml hash=仓内=shared 零漂移） |
+| T-6 | 收账：家族档案（如需）、记忆指纹、suite gitlink | 文档 | Claude | — | 已完成（家族值表零变化不翻档；指纹入 kotlin-ktor 总账；suite gitlink 随本批 bump） |
 
 ## 4. 功能影响（需求与功能对齐的唯一位置）
 
