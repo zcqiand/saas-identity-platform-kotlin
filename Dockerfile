@@ -57,4 +57,5 @@ EXPOSE 5109
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget -q --spider http://127.0.0.1:5109/health || exit 1
 
-ENTRYPOINT ["/app/dist/bin/app"]
+# COPY 尾斜杠语义：dist 内容摊进 /app（bin/app + lib），APP_HOME=/app
+ENTRYPOINT ["/app/bin/app"]
