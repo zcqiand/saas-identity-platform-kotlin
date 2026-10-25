@@ -81,3 +81,7 @@
 | 首航指纹 | 容器内项目名=`rootDir.name`=WORKDIR 基名 `app`（installDist 目录/bin 脚本名联动）；`COPY dist/ /app/` 尾斜杠摊平 → ENTRYPOINT `/app/bin/app`。详见 deploy-chain-fingerprints 记忆账 |
 
 **结论：AC-1/AC-2/AC-3 全过，REQ-2026-001 两仓全闭环（2026-10-25）。**
+
+> 追记：首航后 docker ps 报 (unhealthy)——HEALTHCHECK `--spider` 发 HEAD 被 ktor
+> `/health`（仅 GET）405。v0.1.1-20261025 修复重部署，双仓 (healthy) 复核收尾
+> （指纹三，deploy-chain-fingerprints 在案）。
