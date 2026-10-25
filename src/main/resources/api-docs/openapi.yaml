@@ -1,0 +1,2375 @@
+openapi: 3.0.0
+info:
+  title: (title)
+  version: 0.0.0
+tags:
+  - name: auth
+  - name: admin-tenants
+  - name: me
+  - name: tenant-members
+  - name: tenant-roles
+  - name: admin-clients
+  - name: clients
+  - name: client-menus
+  - name: tenant-role-menus
+  - name: oauth
+  - name: tenant-applications
+paths:
+  /api/v1/admin/clients:
+    get:
+      operationId: AdminClients_listClients
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - page
+                  - pageSize
+                  - total
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OAuthClient'
+                  page:
+                    type: integer
+                    format: int32
+                    example: 0
+                  pageSize:
+                    type: integer
+                    format: int32
+                    example: 20
+                  total:
+                    type: integer
+                    format: int64
+                    example: 0
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-clients
+    post:
+      operationId: AdminClients_createClient
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthClient'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-clients
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOAuthClientRequest'
+  /api/v1/admin/clients/{clientId}:
+    get:
+      operationId: AdminClients_getClient
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthClient'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-clients
+    patch:
+      operationId: AdminClients_updateClient
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthClient'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-clients
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOAuthClientRequest'
+    delete:
+      operationId: AdminClients_deleteClient
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-clients
+  /api/v1/admin/clients/{clientId}/status:
+    patch:
+      operationId: AdminClients_setClientStatus
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthClient'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-clients
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: integer
+                  format: int32
+              required:
+                - status
+  /api/v1/admin/tenants:
+    get:
+      operationId: AdminTenants_listTenants
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - page
+                  - pageSize
+                  - total
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tenant'
+                  page:
+                    type: integer
+                    format: int32
+                    example: 0
+                  pageSize:
+                    type: integer
+                    format: int32
+                    example: 20
+                  total:
+                    type: integer
+                    format: int64
+                    example: 0
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-tenants
+    post:
+      operationId: AdminTenants_createTenant
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-tenants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+  /api/v1/admin/tenants/{id}:
+    get:
+      operationId: AdminTenants_getTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-tenants
+    patch:
+      operationId: AdminTenants_updateTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tenant'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-tenants
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantRequest'
+    delete:
+      operationId: AdminTenants_deleteTenant
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - admin-tenants
+  /api/v1/auth/login:
+    post:
+      operationId: Sessions_login
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: '#/components/schemas/LockedAccountResponse'
+                  - $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+  /api/v1/auth/logout:
+    post:
+      operationId: Sessions_logout
+      parameters: []
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+      tags:
+        - auth
+  /api/v1/clients/{clientId}:
+    get:
+      operationId: Clients_getClient
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthClientPublicInfo'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - clients
+  /api/v1/clients/{clientId}/menus:
+    get:
+      operationId: ClientMenus_listSysMenus
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SysMenu'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - client-menus
+    post:
+      operationId: ClientMenus_createSysMenu
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SysMenu'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - client-menus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSysMenuRequest'
+  /api/v1/clients/{clientId}/menus/{menuId}:
+    get:
+      operationId: ClientMenus_getSysMenu
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: menuId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SysMenu'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - client-menus
+    patch:
+      operationId: ClientMenus_updateSysMenu
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: menuId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SysMenu'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - client-menus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSysMenuRequest'
+    delete:
+      operationId: ClientMenus_deleteSysMenu
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: menuId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - client-menus
+  /api/v1/clients/{clientId}/menus/{menuId}/parent:
+    patch:
+      operationId: ClientMenus_moveSysMenu
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: menuId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SysMenu'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - client-menus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parentId:
+                  type: string
+  /api/v1/clients/{clientId}/menus/{menuId}/reorder:
+    put:
+      operationId: ClientMenus_reorderSysMenus
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: menuId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SysMenu'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - client-menus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReorderSysMenuRequest'
+  /api/v1/me:
+    get:
+      operationId: Me_whoami
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUser'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - me
+  /api/v1/me/menus:
+    get:
+      operationId: Me_getMyMenus
+      parameters:
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/EffectiveMenuNode'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - me
+  /api/v1/me/tenants:
+    get:
+      operationId: Me_listMyTenants
+      parameters:
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TenantMembership'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - me
+  /api/v1/me/tenants/{tenantId}/switch:
+    post:
+      operationId: Me_switchTenant
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwitchTenantResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - me
+  /api/v1/oauth/authorize:
+    post:
+      operationId: OAuth_authorize
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  state:
+                    type: string
+                required:
+                  - code
+                  - state
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - oauth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizeCodeRequest'
+  /api/v1/oauth/token:
+    x-fuzz: skip
+    post:
+      operationId: OAuth_token
+      parameters: []
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - oauth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+  /api/v1/tenants/{tenantId}/applications:
+    get:
+      operationId: TenantApplications_listTenantApplications
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - page
+                  - pageSize
+                  - total
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TenantApplication'
+                  page:
+                    type: integer
+                    format: int32
+                    example: 0
+                  pageSize:
+                    type: integer
+                    format: int32
+                    example: 20
+                  total:
+                    type: integer
+                    format: int64
+                    example: 0
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-applications
+    post:
+      operationId: TenantApplications_subscribeTenantApplication
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantApplication'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-applications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscribeTenantApplicationRequest'
+  /api/v1/tenants/{tenantId}/applications/{clientId}:
+    patch:
+      operationId: TenantApplications_updateTenantApplication
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantApplication'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-applications
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTenantApplicationRequest'
+    delete:
+      operationId: TenantApplications_removeTenantApplication
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-applications
+  /api/v1/tenants/{tenantId}/members:
+    get:
+      operationId: TenantMembers_listTenantUsers
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TenantMemberStatus'
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - page
+                  - pageSize
+                  - total
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TenantMemberUserView'
+                  page:
+                    type: integer
+                    format: int32
+                    example: 0
+                  pageSize:
+                    type: integer
+                    format: int32
+                    example: 20
+                  total:
+                    type: integer
+                    format: int64
+                    example: 0
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+    post:
+      operationId: TenantMembers_createTenantUser
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantMemberUserView'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSysUserRequest'
+  /api/v1/tenants/{tenantId}/members/invitations:
+    post:
+      operationId: TenantMembers_inviteTenantUser
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantMemberView'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                mobile:
+                  type: string
+  /api/v1/tenants/{tenantId}/members/{userId}:
+    get:
+      operationId: TenantMembers_getTenantUser
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantMemberUserView'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+    patch:
+      operationId: TenantMembers_updateTenantUser
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantMemberUserView'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSysUserRequest'
+    delete:
+      operationId: TenantMembers_deleteTenantUser
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+  /api/v1/tenants/{tenantId}/members/{userId}/roles:
+    put:
+      operationId: TenantMembers_assignTenantMemberRoles
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantMemberUserView'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetTenantMemberRolesRequest'
+  /api/v1/tenants/{tenantId}/members/{userId}/status:
+    patch:
+      operationId: TenantMembers_changeTenantUserStatus
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TenantMemberUserView'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-members
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/TenantMemberStatus'
+              required:
+                - status
+  /api/v1/tenants/{tenantId}/roles:
+    get:
+      operationId: TenantRoles_listSysRoles
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - items
+                  - page
+                  - pageSize
+                  - total
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SysRole'
+                  page:
+                    type: integer
+                    format: int32
+                    example: 0
+                  pageSize:
+                    type: integer
+                    format: int32
+                    example: 20
+                  total:
+                    type: integer
+                    format: int64
+                    example: 0
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-roles
+    post:
+      operationId: TenantRoles_createSysRole
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SysRole'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-roles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSysRoleRequest'
+  /api/v1/tenants/{tenantId}/roles/{roleId}:
+    get:
+      operationId: TenantRoles_getSysRole
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SysRole'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-roles
+    patch:
+      operationId: TenantRoles_updateSysRole
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SysRole'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-roles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSysRoleRequest'
+    delete:
+      operationId: TenantRoles_deleteSysRole
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-roles
+  /api/v1/tenants/{tenantId}/roles/{roleId}/menus:
+    get:
+      operationId: TenantRoleMenus_listSysRoleMenus
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleMenuGrant'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-role-menus
+    put:
+      operationId: TenantRoleMenus_setSysRoleMenus
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '200':
+          description: The request has succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleMenuGrant'
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-role-menus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetSysRoleMenusRequest'
+    delete:
+      operationId: TenantRoleMenus_clearSysRoleMenus
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: clientId
+          in: query
+          required: false
+          schema:
+            type: string
+          explode: false
+      responses:
+        '204':
+          description: 'There is no content to send for this request, but the headers may be useful. '
+        default:
+          description: An unexpected error response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      tags:
+        - tenant-role-menus
+components:
+  schemas:
+    AuthorizeCodeRequest:
+      type: object
+      required:
+        - clientId
+        - redirectUri
+        - responseType
+        - state
+      properties:
+        clientId:
+          type: string
+        redirectUri:
+          type: string
+          minLength: 1
+          maxLength: 500
+        responseType:
+          type: string
+          enum:
+            - code
+        scope:
+          type: string
+        state:
+          type: string
+    CreateOAuthClientRequest:
+      type: object
+      required:
+        - clientId
+        - clientName
+        - clientSecret
+        - grantTypes
+        - redirectUris
+      properties:
+        clientId:
+          type: string
+        clientName:
+          type: string
+        clientSecret:
+          type: string
+        grantTypes:
+          type: string
+        redirectUris:
+          type: string
+        scopes:
+          type: string
+        accessTokenValidity:
+          type: integer
+          format: int32
+        refreshTokenValidity:
+          type: integer
+          format: int32
+        autoApprove:
+          type: boolean
+    CreateSysMenuRequest:
+      type: object
+      required:
+        - title
+        - type
+      properties:
+        parentId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        type:
+          $ref: '#/components/schemas/SysMenuType'
+        path:
+          type: string
+        component:
+          type: string
+        perms:
+          type: string
+        icon:
+          type: string
+        sortOrder:
+          type: integer
+          format: int32
+    CreateSysRoleRequest:
+      type: object
+      required:
+        - clientId
+        - roleCode
+        - roleName
+      properties:
+        clientId:
+          type: string
+        roleCode:
+          type: string
+          minLength: 1
+          maxLength: 64
+        roleName:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          type: string
+        isPreset:
+          type: boolean
+    CreateSysUserRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+        password:
+          type: string
+          minLength: 8
+          maxLength: 256
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+    CreateTenantRequest:
+      type: object
+      required:
+        - tenantKey
+        - name
+      properties:
+        tenantKey:
+          type: string
+          minLength: 2
+          maxLength: 64
+        name:
+          type: string
+          minLength: 2
+          maxLength: 128
+    CurrentUser:
+      type: object
+      required:
+        - id
+        - memberships
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantMembership'
+        currentTenantId:
+          type: string
+          format: uuid
+    EffectiveMenuNode:
+      type: object
+      required:
+        - id
+        - clientId
+        - parentId
+        - title
+        - type
+        - sortOrder
+        - children
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+        parentId:
+          type: string
+          nullable: true
+          format: uuid
+        title:
+          type: string
+        type:
+          $ref: '#/components/schemas/SysMenuType'
+        path:
+          type: string
+        component:
+          type: string
+        perms:
+          type: string
+        icon:
+          type: string
+        sortOrder:
+          type: integer
+          format: int32
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/EffectiveMenuNode'
+    ErrorResponse:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          example: BAD_REQUEST
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: {}
+    LockedAccountResponse:
+      type: object
+      required:
+        - code
+        - message
+        - lockedUntil
+      properties:
+        code:
+          type: string
+          example: ACCOUNT_LOCKED
+        message:
+          type: string
+        lockedUntil:
+          type: string
+          format: date-time
+        remainingAttempts:
+          type: integer
+          format: int32
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+        - clientId
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+        password:
+          type: string
+          minLength: 1
+          maxLength: 128
+        clientId:
+          type: string
+    LoginResponse:
+      type: object
+      required:
+        - user
+        - availableTenants
+        - userId
+        - clientId
+      properties:
+        user:
+          $ref: '#/components/schemas/SysUser'
+        availableTenants:
+          type: array
+          items:
+            $ref: '#/components/schemas/TenantMembership'
+        userId:
+          type: string
+          format: uuid
+        currentTenantId:
+          type: string
+          format: uuid
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: integer
+          format: int32
+        clientId:
+          type: string
+    OAuthClient:
+      type: object
+      required:
+        - id
+        - clientId
+        - clientName
+        - grantTypes
+        - redirectUris
+        - accessTokenValidity
+        - refreshTokenValidity
+        - autoApprove
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+        clientName:
+          type: string
+        grantTypes:
+          type: string
+        redirectUris:
+          type: string
+        scopes:
+          type: string
+        accessTokenValidity:
+          type: integer
+          format: int32
+        refreshTokenValidity:
+          type: integer
+          format: int32
+        autoApprove:
+          type: boolean
+        status:
+          type: integer
+          format: int32
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    OAuthClientPublicInfo:
+      type: object
+      required:
+        - clientId
+        - clientName
+        - status
+      properties:
+        clientId:
+          type: string
+        clientName:
+          type: string
+        status:
+          type: integer
+          format: int32
+    ReorderSysMenuRequest:
+      type: object
+      required:
+        - orderedMenuIds
+      properties:
+        orderedMenuIds:
+          type: array
+          items:
+            type: string
+    RoleMenuGrant:
+      type: object
+      required:
+        - roleId
+        - tenantId
+        - menuIds
+        - updatedAt
+      properties:
+        roleId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        menuIds:
+          type: array
+          items:
+            type: string
+        updatedAt:
+          type: string
+          format: date-time
+    SetSysRoleMenusRequest:
+      type: object
+      required:
+        - menuIds
+      properties:
+        menuIds:
+          type: array
+          items:
+            type: string
+    SetTenantMemberRolesRequest:
+      type: object
+      required:
+        - roleIds
+      properties:
+        roleIds:
+          type: array
+          items:
+            type: string
+    SubscribeTenantApplicationRequest:
+      type: object
+      required:
+        - clientId
+      properties:
+        clientId:
+          type: string
+        expireTime:
+          type: string
+          format: date-time
+    SwitchTenantResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - expiresAt
+        - tenantId
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        tenantId:
+          type: string
+          format: uuid
+    SysMenu:
+      type: object
+      required:
+        - id
+        - clientId
+        - parentId
+        - title
+        - type
+        - sortOrder
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+        parentId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        type:
+          $ref: '#/components/schemas/SysMenuType'
+        path:
+          type: string
+        component:
+          type: string
+        perms:
+          type: string
+        icon:
+          type: string
+        sortOrder:
+          type: integer
+          format: int32
+        status:
+          type: integer
+          format: int32
+        createdAt:
+          type: string
+          format: date-time
+    SysMenuType:
+      type: string
+      enum:
+        - directory
+        - menu
+        - button
+    SysRole:
+      type: object
+      required:
+        - id
+        - tenantId
+        - clientId
+        - roleCode
+        - roleName
+        - isPreset
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+        roleCode:
+          type: string
+          minLength: 1
+          maxLength: 64
+        roleName:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          type: string
+        isPreset:
+          type: boolean
+        status:
+          type: integer
+          format: int32
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SysUser:
+      type: object
+      required:
+        - id
+        - username
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+        status:
+          $ref: '#/components/schemas/SysUserStatus'
+        failedAttempts:
+          type: integer
+          format: int32
+        lockedUntil:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    SysUserStatus:
+      type: string
+      enum:
+        - active
+        - invited
+        - disabled
+    Tenant:
+      type: object
+      required:
+        - id
+        - tenantKey
+        - name
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantKey:
+          type: string
+          minLength: 2
+          maxLength: 64
+        name:
+          type: string
+          minLength: 2
+          maxLength: 128
+        status:
+          $ref: '#/components/schemas/TenantStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TenantApplication:
+      type: object
+      required:
+        - id
+        - tenantId
+        - clientId
+        - status
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+        status:
+          type: integer
+          format: int32
+        expireTime:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+    TenantMember:
+      type: object
+      required:
+        - id
+        - tenantId
+        - userId
+        - isOwner
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        memberName:
+          type: string
+        isOwner:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/TenantMemberStatus'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TenantMemberStatus:
+      type: string
+      enum:
+        - active
+        - invited
+        - suspended
+        - disabled
+    TenantMemberUserView:
+      type: object
+      required:
+        - id
+        - tenantId
+        - username
+        - status
+        - roleIds
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        username:
+          type: string
+          minLength: 1
+          maxLength: 64
+        email:
+          type: string
+          format: email
+        status:
+          $ref: '#/components/schemas/TenantMemberStatus'
+        roleIds:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TenantMemberView:
+      type: object
+      required:
+        - member
+        - user
+        - roles
+      properties:
+        member:
+          $ref: '#/components/schemas/TenantMember'
+        user:
+          $ref: '#/components/schemas/SysUser'
+        roles:
+          type: array
+          items:
+            type: string
+    TenantMembership:
+      type: object
+      required:
+        - id
+        - userId
+        - tenantId
+        - roleIds
+        - status
+        - joinedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        tenantId:
+          type: string
+          format: uuid
+        roleIds:
+          type: array
+          items:
+            type: string
+        status:
+          $ref: '#/components/schemas/TenantMemberStatus'
+        joinedAt:
+          type: string
+          format: date-time
+    TenantStatus:
+      type: string
+      enum:
+        - active
+        - suspended
+    TokenRequest:
+      type: object
+      required:
+        - grantType
+        - clientId
+      properties:
+        grantType:
+          type: string
+          enum:
+            - authorization_code
+            - refresh_token
+        code:
+          type: string
+        refreshToken:
+          type: string
+        clientId:
+          type: string
+        clientSecret:
+          type: string
+        redirectUri:
+          type: string
+    TokenResponse:
+      type: object
+      required:
+        - accessToken
+        - refreshToken
+        - tokenType
+        - expiresIn
+        - userId
+        - clientId
+        - tenantId
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        tokenType:
+          type: string
+        expiresIn:
+          type: integer
+          format: int32
+        scope:
+          type: string
+        userId:
+          type: string
+        clientId:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+    UpdateOAuthClientRequest:
+      type: object
+      properties:
+        clientName:
+          type: string
+        grantTypes:
+          type: string
+        redirectUris:
+          type: string
+        scopes:
+          type: string
+        accessTokenValidity:
+          type: integer
+          format: int32
+        refreshTokenValidity:
+          type: integer
+          format: int32
+        autoApprove:
+          type: boolean
+        status:
+          type: integer
+          format: int32
+    UpdateSysMenuRequest:
+      type: object
+      properties:
+        parentId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        type:
+          $ref: '#/components/schemas/SysMenuType'
+        path:
+          type: string
+        component:
+          type: string
+        perms:
+          type: string
+        icon:
+          type: string
+        sortOrder:
+          type: integer
+          format: int32
+        status:
+          type: integer
+          format: int32
+    UpdateSysRoleRequest:
+      type: object
+      properties:
+        roleName:
+          type: string
+          minLength: 1
+          maxLength: 64
+        description:
+          type: string
+        status:
+          type: integer
+          format: int32
+    UpdateSysUserRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        mobile:
+          type: string
+    UpdateTenantApplicationRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: integer
+          format: int32
+        expireTime:
+          type: string
+          format: date-time
+    UpdateTenantRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 128
+        status:
+          $ref: '#/components/schemas/TenantStatus'
+servers:
+  - url: https://api.example.com
+    description: Production
+    variables: {}

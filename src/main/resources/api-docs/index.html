@@ -1,0 +1,19 @@
+<!doctype html>
+<!-- Swagger 文档面入口（REQ-2026-003）：自写薄壳引 webjar 静态件，喂 /api-docs/openapi.yaml
+     （shared 契约生成物，gen-shared.sh 落盘）。不用 webjar 自带 index.html——它初始化
+     petstore 示例；换 spec 必须自写 init。基础设施端点，不进契约面/功能树（与 /health 同模式）。 -->
+<html lang="zh">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>saas-identity-platform-kotlin API</title>
+    <link rel="stylesheet" href="/swagger-ui/5.34.0/swagger-ui.css" />
+  </head>
+  <body>
+    <div id="swagger-ui"></div>
+    <script src="/swagger-ui/5.34.0/swagger-ui-bundle.js"></script>
+    <script>
+      SwaggerUIBundle({ url: "/api-docs/openapi.yaml", dom_id: "#swagger-ui" });
+    </script>
+  </body>
+</html>

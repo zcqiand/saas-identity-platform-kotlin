@@ -49,6 +49,10 @@ dependencies {
   implementation("io.jsonwebtoken:jjwt-api:0.12.6")
   runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
   runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
+  // Swagger 文档面（REQ-2026-003）：webjar 静态件挂 /swagger-ui（org.webjars.npm）。
+  // jar 内原生布局 = META-INF/resources/webjars/swagger-ui-dist/5.34.0/*（版本层在）；
+  // 路由形态见 Application.kt webjar 指纹注释（挂前缀、版本走请求 URL）。BOM 外钉 exact 禁浮动。
+  implementation("org.webjars.npm:swagger-ui-dist:5.34.0")
   // 测试 scratch 库 admin DDL（DROP/CREATE DATABASE 不能跑在事务内，R2DBC 事务壳不适合；JDBC 直连）
   testImplementation("org.postgresql:postgresql:42.7.7")
   testImplementation("io.ktor:ktor-server-test-host")

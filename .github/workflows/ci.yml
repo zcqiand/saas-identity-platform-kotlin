@@ -49,7 +49,7 @@ jobs:
           chmod +x gradlew
           ./gradlew --no-daemon ktfmtCheck detekt test
 
-      - name: 镜像装配冒烟 — build + run + /health 200
+      - name: 镜像装配冒烟 — build + run + /health + swagger 文档面 200
         # 直接构建 prod 同款镜像并拉起（比 runner 级拉起更真：连 Dockerfile 一起验），
         # 探 /health。env 占位值是显式提供（suite 硬规则 §1），装配期不触库，
         # /health 不消费 DB（AppConfig 只 fail-fast 校验键存在）。
@@ -77,6 +77,17 @@ jobs:
           done
           if [ -z "$ok" ]; then
             echo "ERROR: ktor smoke /health 未 200（60s 上限），容器日志:" >&2
+            docker logs ktor-smoke 2>&1 | tail -40 >&2
+            docker rm -f ktor-smoke >/dev/null 2>&1 || true
+            exit 1
+          fi
+          # Swagger 文档面（REQ-2026-003）：契约产物 + 薄壳页 + webjar 三件都在线
+          docs="$(curl -fsS --max-time 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:5109/api-docs/openapi.yaml 2>/dev/null || true)"
+          shell="$(curl -fsS --max-time 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:5109/api-docs 2>/dev/null || true)"
+          ui="$(curl -fsS --max-time 3 -o /dev/null -w '%{http_code}' http://127.0.0.1:5109/swagger-ui/5.34.0/swagger-ui.css 2>/dev/null || true)"
+          echo "→ /api-docs/openapi.yaml: $docs / /docs: $shell / /swagger-ui/5.34.0/swagger-ui.css: $ui"
+          if [ "$docs" != "200" ] || [ "$shell" != "200" ] || [ "$ui" != "200" ]; then
+            echo "ERROR: swagger 文档面探针非 200，容器日志:" >&2
             docker logs ktor-smoke 2>&1 | tail -40 >&2
             docker rm -f ktor-smoke >/dev/null 2>&1 || true
             exit 1

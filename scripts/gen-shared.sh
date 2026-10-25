@@ -23,8 +23,11 @@ cd "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
 
 SHARED_PKG=src/main/kotlin/saas/identity/shared
 SHARED_DIR="$(cd ../saas-identity-platform-shared && pwd)"
+# Swagger 文档面真源（REQ-2026-003）：shared emit 的 openapi.yaml 原样落 resources，
+# 应用 /api-docs/openapi.yaml 直接喂 swagger-ui——零手写注解，契约漂移在 regen 即同步。
+DOCS_PKG=src/main/resources/api-docs
 GEN_TMP=.openapi-tmp/gen
-ZONE_ARGS=(-- "$SHARED_PKG")
+ZONE_ARGS=(-- "$SHARED_PKG" "$DOCS_PKG")
 
 echo "[gen-shared] step 1/4 — shared 仓 emit:openapi（TypeSpec SSOT 单 emit）"
 (cd "$SHARED_DIR" && npm run emit:openapi)
@@ -69,12 +72,14 @@ cp -r "$GEN_SHARED/api" "$SHARED_PKG/api"
 cp -r "$GEN_SHARED/models" "$SHARED_PKG/models"
 cp "$GEN_SHARED/Paths.kt" "$SHARED_PKG/Paths.kt"
 cp -r "$GEN_SHARED/infrastructure" "$SHARED_PKG/infrastructure"
+mkdir -p "$DOCS_PKG"
+cp "$SHARED_DIR/generated/openapi/openapi.yaml" "$DOCS_PKG/openapi.yaml"
 rm -rf .openapi-tmp
 
 # 漂移 fail-loud（fastapi 同款）：生成区与 git HEAD 不一致即红。untracked 也算——
 # 防生成漏 git add 后门禁读旧产物假绿（池项 5.31 教训）。
 if ! git diff --exit-code --quiet "${ZONE_ARGS[@]}" 2>/dev/null \
-  || [ -n "$(git ls-files --others --exclude-standard -- "$SHARED_PKG")" ]; then
+  || [ -n "$(git ls-files --others --exclude-standard -- "$SHARED_PKG" "$DOCS_PKG")" ]; then
   echo "[gen-shared] FATAL: 生成区与 git HEAD 不一致（含 untracked 新文件）" >&2
   echo "[gen-shared]        处理：确认 shared .tsp 变更合法后 git add 生成区并 commit，再重跑本脚本核绿" >&2
   exit 1
