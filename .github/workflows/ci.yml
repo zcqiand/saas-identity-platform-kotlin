@@ -1,0 +1,146 @@
+name: ci
+
+# saas-identity-platform-kotlin (Kotlin 2.x + ktor Netty + Exposed, JVM 21)
+# 家族原则（镜像 laravel/fastapi ci.yml 注释）：CI=门内静态三件(ktfmt/detekt/test
+# + 真 PG service) + 镜像装配冒烟；suite gate=全量（L0.5 deploy parity 在本地跑）。
+# gradle wrapper 9.8.1 钉版（distributionUrl 腾讯镜像，runner 全网可达）。
+on:
+  push:
+    branches: [master]
+    tags: ["v*"]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # 本地 gate L4 同形：saas_test @ 127.0.0.1:54321，凭据 postgres/postgres（db-env.sh 镜像）
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: saas_test
+        ports:
+          - 54321:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: L1/L2/L4 — ktfmtCheck + detekt + test（env 与 .env.test 严格同值）
+        # AppConfig 6 键 fail-fast：测试装配期全量注入（gate L4 通用通道同形）。
+        # R2dbcDatabase.connect 惰性建连，schema 由测试自建（Exposed SchemaUtils）。
+        env:
+          SERVER_PORT: "5109"
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54321/saas_test
+          JWT_SIGNING_KEY: dev-key-32-bytes-minimum-length!
+          JWT_ISSUER: saas-identity-platform
+          JWT_AUDIENCE: saas-identity-platform-clients
+          JWT_TTL_SECONDS: "3600"
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon ktfmtCheck detekt test
+
+      - name: 镜像装配冒烟 — build + run + /health 200
+        # 直接构建 prod 同款镜像并拉起（比 runner 级拉起更真：连 Dockerfile 一起验），
+        # 探 /health。env 占位值是显式提供（suite 硬规则 §1），装配期不触库，
+        # /health 不消费 DB（AppConfig 只 fail-fast 校验键存在）。
+        env:
+          DATABASE_URL: postgresql://placeholder:placeholder@127.0.0.1:54321/placeholder
+          JWT_SIGNING_KEY: dev-key-32-bytes-minimum-length!
+        run: |
+          chmod +x gradlew
+          docker build -t ktor-smoke .
+          docker rm -f ktor-smoke >/dev/null 2>&1 || true
+          docker run -d --name ktor-smoke -p 127.0.0.1:5109:5109 \
+            --env SERVER_PORT=5109 --env DATABASE_URL="$DATABASE_URL" \
+            --env JWT_SIGNING_KEY="$JWT_SIGNING_KEY" \
+            --env JWT_ISSUER=saas-identity-platform \
+            --env JWT_AUDIENCE=saas-identity-platform-clients \
+            --env JWT_TTL_SECONDS=3600 ktor-smoke
+          ok=""
+          for i in $(seq 1 60); do
+            body="$(curl -fsS --max-time 3 http://127.0.0.1:5109/health 2>/dev/null || true)"
+            if [ -n "$body" ]; then
+              echo "→ /health: $body"
+              echo "$body" | grep -q '"ok":true' && ok=1 && break
+            fi
+            sleep 1
+          done
+          if [ -z "$ok" ]; then
+            echo "ERROR: ktor smoke /health 未 200（60s 上限），容器日志:" >&2
+            docker logs ktor-smoke 2>&1 | tail -40 >&2
+            docker rm -f ktor-smoke >/dev/null 2>&1 || true
+            exit 1
+          fi
+          docker rm -f ktor-smoke >/dev/null 2>&1 || true
+
+  # 部署链（saas X09=5109；镜像 laravel deploy job，tag push 触发）:
+  #   docker build & push（latest + tag 双份）→ VPS deploy 脚本拉镜像 + 渲染 nginx vhost
+  #   + 起容器 + /health 探活。kotlin.env 首启由 deploy 脚本从 SSH 透传 secrets 自举。
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: startsWith(github.ref, 'refs/tags/')
+    concurrency:
+      group: deploy-${{ github.event.repository.name }}-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ github.event.repository.name }}:${{ github.ref_name }}
+
+      - name: Pull image and restart container on VPS
+        uses: appleboy/ssh-action@v1
+        # appleboy/ssh-action@v1 的 ${{ secrets.* }} 不会自动进 SSH 远端 shell;
+        # step env 注入 Actions env,with.envs 列出要转发的名字 (逗号分隔)。
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SIGNING_KEY: ${{ secrets.JWT_SIGNING_KEY }}
+          NGINX_DOMAIN: ${{ vars.NGINX_DOMAIN }}
+          NGINX_CERT_BASENAME: ${{ vars.NGINX_CERT_BASENAME }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: DATABASE_URL,JWT_SIGNING_KEY,NGINX_DOMAIN,NGINX_CERT_BASENAME
+          script: |
+            # 自举: 首次部署无 /home/deploy/<repo>/ 时自动建 + 拉 deploy 脚本
+            set -e
+            REPO="${{ github.event.repository.name }}"
+            DEPLOY_DIR="/home/deploy/$REPO"
+            mkdir -p "$DEPLOY_DIR"
+            cd "$DEPLOY_DIR"
+            # 总是重拉最新 deploy 脚本（脚本 bug fix 立即生效）；nginx 模板由脚本自拉
+            curl -fsSL "https://raw.githubusercontent.com/zcqiand/${REPO}/refs/heads/master/deploy/${REPO}.sh" -o "$REPO.sh"
+            chmod +x "$REPO.sh"
+            # 缺 kotlin.env 时, deploy 脚本从 SSH env 透传的 secrets 自举
+            # (UMASK 077, chmod 600)。后续 deploy 不需要这些 env (env-file 已存在)。
+            echo "→ env on remote: DATABASE_URL_set=$([ -n \"${DATABASE_URL:-}\" ] && echo yes || echo no)"
+            if [ ! -f "kotlin.env" ] && [ -z "${DATABASE_URL:-}" ]; then
+              echo "ERROR: kotlin.env missing AND DATABASE_URL secret not forwarded, deploy script will fail-fast" >&2
+            fi
+            sh "$REPO.sh" "${{ secrets.DOCKER_USERNAME }}" "${{ secrets.DOCKER_PASSWORD }}" "${{ github.ref_name }}"

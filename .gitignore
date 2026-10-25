@@ -1,12 +1,16 @@
 .gradle/
 build/
 .env
+# .env.production 真值含 secret 不进 git（suite L0.5 政策：production=gitignored 契约；
+# 2026-10-25 deploy 链 REQ-2026-001 解除 scaffold 残留追踪，springboot 先例同）
+.env.production
 # suite 运行态（家族仓 .gitignore 惯例，见 docs/conventions/submodule.md §7）
 .state/trace.json
 .state/gate.json
 .state/gate.partial.json
 .state/alignment.json
 .state/tree-change.json
+.state/tree-change.applied.json
 
 # openapi-generator 临时目录（gen-shared.sh 中转，2026-10-15 Phase 2 收尾补登记）
 .openapi-tmp/

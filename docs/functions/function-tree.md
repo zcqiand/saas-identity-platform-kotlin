@@ -38,13 +38,13 @@
 
 | 功能 ID | 功能名称 | 说明 | 状态 |
 |---|---|---|---|
-| M00.F01 | 租户维护 | 平台 admin 范围管理租户（与旧 M00.F01 同 op） | 开发中 |
+| M00.F01 | 租户维护 | 平台 admin 范围管理租户（与旧 M00.F01 同 op） | 已上线 |
 
 ### M00.F01 租户维护
 
 | 子项 ID | 名称 | 类型 | 交付 | 说明 | 状态 |
 |---|---|---|---|---|---|
-| M00.F01.I01 | 租户列表 | 接口 | 前端+后端 | 平台 admin 分页查看全部租户（含名称/状态过滤；`admin-tenants.tsp:8`） | 开发中 |
+| M00.F01.I01 | 租户列表 | 接口 | 前端+后端 | 平台 admin 分页查看全部租户（含名称/状态过滤；`admin-tenants.tsp:8`） | 已上线 |
 
 ---
 
@@ -60,14 +60,14 @@
 
 | 子项 ID | 名称 | 类型 | 交付 | 说明 | 状态 |
 |---|---|---|---|---|---|
-| M01.F01.I01 | 当前用户 whoami | 查询 | 前端+后端 | 返回当前会话用户的基础身份信息（id/email/displayName；`me.tsp:8`） | 开发中 |
+| M01.F01.I01 | 当前用户 whoami | 查询 | 前端+后端 | 返回当前会话用户的基础身份信息（id/email/displayName；`me.tsp:8`） | 已上线 |
 
 ### M01.F03 租户成员
 
 | 子项 ID | 名称 | 类型 | 交付 | 说明 | 状态 |
 |---|---|---|---|---|---|
-| M01.F03.I01 | 列出我的租户成员关系 | 查询 | 前端+后端 | 查看当前用户在指定应用下所属的全部租户成员身份（`me.tsp:13`） | 开发中 |
-| M01.F03.I02 | 切换当前租户 | 接口 | 前端+后端 | 把当前会话切换到指定租户，更新后续请求的 tenantId 上下文（`me.tsp:18`） | 开发中 |
+| M01.F03.I01 | 列出我的租户成员关系 | 查询 | 前端+后端 | 查看当前用户在指定应用下所属的全部租户成员身份（`me.tsp:13`） | 已上线 |
+| M01.F03.I02 | 切换当前租户 | 接口 | 前端+后端 | 把当前会话切换到指定租户，更新后续请求的 tenantId 上下文（`me.tsp:18`） | 已上线 |
 
 ### M01.F04 SSO 登录
 
@@ -76,8 +76,8 @@
 
 | 子项 ID | 名称 | 类型 | 交付 | 说明 | 状态 |
 |---|---|---|---|---|---|
-| M01.F04.I01 | 密码登录 | 接口 | 前端+后端 | 邮箱+密码换取 access_token + refresh_token（HS256 JWT，token 对落库）；连续 5 次密码错锁 15 分钟，窗口内 423 空体；401 同语义不泄露存在性；availableTenants=active membership ∩ 客户端订阅（订阅空集不过滤） | 开发中 |
-| M01.F04.I06 | 登出（本地清理 + 全局 SSO） | 接口 | 前端+后端 | `/auth/logout` 本地 no-op 成功（fastapi sessions_logout 镜像；全局 SSO 归 IdP 面） | 开发中 |
+| M01.F04.I01 | 密码登录 | 接口 | 前端+后端 | 邮箱+密码换取 access_token + refresh_token（HS256 JWT，token 对落库）；连续 5 次密码错锁 15 分钟，窗口内 423 空体；401 同语义不泄露存在性；availableTenants=active membership ∩ 客户端订阅（订阅空集不过滤） | 已上线 |
+| M01.F04.I06 | 登出（本地清理 + 全局 SSO） | 接口 | 前端+后端 | `/auth/logout` 本地 no-op 成功（fastapi sessions_logout 镜像；全局 SSO 归 IdP 面） | 已上线 |
 
 > I03（密码登录UI，仅前端）不进本后端树；I02/I04/I05/I07 见下方「已废弃功能子项」。
 
@@ -87,7 +87,7 @@
 
 | 功能 ID | 功能名称 | 说明 | 状态 |
 |---|---|---|---|
-| M04.F03 | 身份认证 | OAuth authorize + token + refresh（旧 M04.F03.I07-I09） | 开发中 |
+| M04.F03 | 身份认证 | OAuth authorize + token + refresh（旧 M04.F03.I07-I09） | 已上线 |
 | M04.F04 | 菜单管理 | 菜单 CRUD + 结构 + 当前用户菜单（旧 M08 + 旧 M09 渲染部分） | 开发中 |
 
 ### M04.F03 身份认证
@@ -97,14 +97,14 @@
 
 | 子项 ID | 名称 | 类型 | 交付 | 说明 | 状态 |
 |---|---|---|---|---|---|
-| M04.F03.I01 | 授权码签发 | 接口 | 前端+后端 | 校验 Bearer claims + redirect_uri 白名单后签发一次性 authorization_code（5 分钟，落 oauth_code；`oauth.tsp:10`） | 开发中 |
-| M04.F03.I02 | OIDC token 端点（双 grant） | 接口 | 前端+后端 | `/oauth/token` 接收 authorization_code / refresh_token 双 grant，返回 access_token（可同时轮换 refresh_token；`oauth.tsp:15`；合并 I03） | 开发中 |
+| M04.F03.I01 | 授权码签发 | 接口 | 前端+后端 | 校验 Bearer claims + redirect_uri 白名单后签发一次性 authorization_code（5 分钟，落 oauth_code；`oauth.tsp:10`） | 已上线 |
+| M04.F03.I02 | OIDC token 端点（双 grant） | 接口 | 前端+后端 | `/oauth/token` 接收 authorization_code / refresh_token 双 grant，返回 access_token（可同时轮换 refresh_token；`oauth.tsp:15`；合并 I03） | 已上线 |
 
 ### M04.F04 菜单管理
 
 | 子项 ID | 名称 | 类型 | 交付 | 说明 | 状态 |
 |---|---|---|---|---|---|
-| M04.F04.I08 | 当前用户有效菜单 | 查询 | 前端+后端 | 渲染当前用户在指定应用/租户下有权访问的菜单树（详见 me-menus.md；`me.tsp:26`） | 开发中 |
+| M04.F04.I08 | 当前用户有效菜单 | 查询 | 前端+后端 | 渲染当前用户在指定应用/租户下有权访问的菜单树（详见 me-menus.md；`me.tsp:26`） | 已上线 |
 
 ---
 

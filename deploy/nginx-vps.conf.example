@@ -1,0 +1,56 @@
+# VPS nginx vhost — saas-identity-platform-kotlin
+#
+# 这份是「参考模板」，不在 nginx include 路径里。.example 后缀让 nginx
+# 不会把它当真；deploy 脚本每次部署都会从 master 重拉并渲染占位符
+# （saas.YOUR_DOMAIN / your-cert.* → 实际域名与 cert）。
+#
+# 用法（manual）:
+#   1. 复制:cp deploy/nginx-vps.conf.example /etc/nginx/sites-available/YOUR_DOMAIN
+#   2. sed 替换 saas.YOUR_DOMAIN → 你的域名、your-cert.crt/key → 实际 cert 路径
+#   3. 启用:ln -sf /etc/nginx/sites-available/YOUR_DOMAIN /etc/nginx/sites-enabled/
+#   4. 同一台 VPS 上若已有 saas vhost 占了 default_server，删 sites-enabled/default
+#   5. nginx -t && systemctl reload nginx
+#
+# 这份配置的目的:
+#   - saas-kotlin.xiangru.uk 的 HTTP 301 到 HTTPS
+#   - HTTPS 终结在 VPS（持 cert）
+#   - proxy_pass 到本机容器端口 5109（host=container；ADR-0018 单层 port 方案，
+#     由 docker run -p 127.0.0.1:5109:5109 决定；saas 后端段 X09）。
+
+server {
+    listen 80;
+    server_name saas.YOUR_DOMAIN;            # 改:你的域名
+    return 301 https://$host$request_uri;
+}
+
+server {
+    # 家族模板老 listen 参数语法（VPS nginx <1.25.1 不认 `http2 on;` 独立指令，
+    # 2026-10-06 expense 首航指纹——勿改新语法）
+    listen 443 ssl http2;
+    server_name saas.YOUR_DOMAIN;            # 改
+
+    # cert / key 在 VPS 本地，**不入仓**
+    ssl_certificate     /etc/nginx/ssl/your-cert.cert;   # 改
+    ssl_certificate_key /etc/nginx/ssl/your-cert.key;    # 改
+
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 1d;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_prefer_server_ciphers on;
+
+    # 浏览器一年 HTTPS-only
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
+    location / {
+        # 容器内 Netty 监听 :5109，host=container=5109（Dockerfile ENTRYPOINT 钉死）
+        # 改端口必须同步 Dockerfile EXPOSE 与 deploy/saas-identity-platform-kotlin.sh 的 -p
+        proxy_pass http://127.0.0.1:5109;
+
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
