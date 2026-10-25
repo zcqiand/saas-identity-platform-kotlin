@@ -51,11 +51,10 @@ ENV TZ=UTC
 
 EXPOSE 5109
 
-# Netty 装配 + Exposed 连库冷启动 @ 小 VPS。probe 走 /health（busybox wget
-# 解析 127.0.0.1 字面量，不经 ::1——IPv6 localhost 陷阱防在案）。
-# 未就绪时 wget 非 0 → restart-loop，fail-loud 是想要的。
+# Netty 装配 + Exposed 连库冷启动 @ 小 VPS。probe 走 GET /health（2026-10-25 首航指纹：
+# --spider 发 HEAD，ktor /health 只注册 GET → 405 → 恒 unhealthy，须 -O /dev/null 真拉）。
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD wget -q --spider http://127.0.0.1:5109/health || exit 1
+  CMD wget -q -O /dev/null http://127.0.0.1:5109/health || exit 1
 
 # COPY 尾斜杠语义：dist 内容摊进 /app（bin/app + lib），APP_HOME=/app
 ENTRYPOINT ["/app/bin/app"]
