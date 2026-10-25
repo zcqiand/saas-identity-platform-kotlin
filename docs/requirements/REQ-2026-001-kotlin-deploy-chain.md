@@ -5,7 +5,7 @@
 | 提出人 | zcqiand |
 | 提出日期 | 2026-10-25 |
 | 优先级 | P1 |
-| 状态 | 待评审（后置：kotlin 业务功能先完成，见澄清记录 #5） |
+| 状态 | 已完成（2026-10-25 全链落地，见 §7 首航记录） |
 | 关联 ADR | — |
 
 ## 1. 需求描述
@@ -44,9 +44,9 @@
 |---|---|---|---|---|---|
 | T-1 | saas-kotlin deploy 五件套落地（Dockerfile、CI workflow、deploy 脚本、nginx vhost 模板、探活接线；母本照后端栈仓既有脚本） | 工程 | — | — | 已完成（2026-10-25，五件套+L0.5 parity 验证） |
 | T-2 | lab-kotlin 五件套（镜像 T-1，值差异仅端口/域名/库名） | 工程 | — | — | 已完成（2026-10-25，五件套+L0.5 parity 验证） |
-| T-3 | saas 侧首次 tag push 真部署 + prod 探活 + 回滚演练（AC-1/AC-2） | 工程 | — | — | 待开始 |
-| T-4 | lab 侧同 T-3 | 工程 | — | — | 待开始 |
-| T-5 | 家族档案值表翻转（saas.md / lab.md X09 行）+ 两仓台账收账，同 commit | 文档 | — | — | 待开始 |
+| T-3 | saas 侧首次 tag push 真部署 + prod 探活 + 回滚演练（AC-1/AC-2） | 工程 | — | — | 已完成（2026-10-25 首航：tag v0.1.0-20261025，探活 200 + 401 形状验证） |
+| T-4 | lab 侧同 T-3 | 工程 | — | — | 已完成（2026-10-25 同上，saas 侧） |
+| T-5 | 家族档案值表翻转（saas.md / lab.md X09 行）+ 两仓台账收账，同 commit | 文档 | — | — | 已完成（2026-10-25 家族档案 X09 行翻转 + 台账收账） |
 
 ## 4. 功能影响（需求与功能对齐的唯一位置）
 
@@ -69,3 +69,15 @@
 | VPS 主机端口 5109 首次启用，可能被占用 | 容器起不来 | 部署前 `ss -ltn` 核对端口空闲 | 释放占用或按家族扩展段换槽（须先改值表，两处同 commit） |
 | GitHub Secrets（DOCKER_USERNAME/PASSWORD、VPS_*）若未覆盖本仓，CI 起不来 | CI 失败 | 首次 tag 前核验 secrets 配置（agent 家族六仓先例已配，家族仓按需补） | — |
 | 五件套值不同步（Dockerfile EXPOSE、deploy `-p`、vhost `proxy_pass` 三处端口） | 探针 connection refused | 照「改端口三处同步」纪律，一处 commit 内完成；deploy-chain 指纹在案 | 修正后重跑脚本 |
+
+## 7. 首航与回滚演练记录（2026-10-25）
+
+| 项 | 证据 |
+|---|---|
+| 首航 tag | `v0.1.0-20261025`（两仓同版；CI run 40152633620 / 40153022702，test+deploy 双 job success） |
+| AC-1 探活 | `saas-kotlin.xiangru.uk/health` → 200 `{"ok":true,"mode":"ktor"}`；业务路由 `/api/auth/menus` 无 Bearer → 401 `INVALID_CREDENTIALS`（假绿防线过） |
+| AC-2 回滚演练 | VPS 侧重跑 deploy 脚本显式 tag `v0.1.0-20261025`（saas 2s / lab 2s 探活 200），双域复探 200——回滚通道存在且演练过一次 |
+| secrets | saas 7 件 / lab 10 件（`sync_secrets.py` + infra 五件自 settings/VPS 回读管道直推，无回显）；NGINX_DOMAIN/NGINX_CERT_BASENAME vars 照 laravel 惯例配 |
+| 首航指纹 | 容器内项目名=`rootDir.name`=WORKDIR 基名 `app`（installDist 目录/bin 脚本名联动）；`COPY dist/ /app/` 尾斜杠摊平 → ENTRYPOINT `/app/bin/app`。详见 deploy-chain-fingerprints 记忆账 |
+
+**结论：AC-1/AC-2/AC-3 全过，REQ-2026-001 两仓全闭环（2026-10-25）。**
