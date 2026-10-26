@@ -7,11 +7,12 @@ SaaS 身份平台 Kotlin/Ktor 端（`saas-identity-platform-kotlin`）——一�
 ## 快速开始
 
 ```bash
-# 按 ktor 栈替换为实际命令
-npm install        # 安装依赖
-npm test           # 全量测试（无 Key / 无 Docker / 无网可跑）
-npm run dev        # 本地开发
-npm run build      # 生产构建
+# 前置：gradle 在 PATH（本机 gradle-9.8.1，见 memory: gate-ops-ledger）
+gradle ktfmtCheck       # L1 格式
+gradle detekt           # L2 静态
+gradle compileKotlin    # L3 编译
+gradle test             # L4 测试
+gradle run              # 本地起服务（mainClass io.xr.harness.ApplicationKt，SERVER_PORT=5109）
 ```
 
 ## 功能特性
@@ -22,7 +23,7 @@ npm run build      # 生产构建
 
 | 技术 | 版本 |
 | :--- | :--- |
-| __STACK_DESC_LINE__ | |
+| Kotlin / Ktor | 版本全集见 version-lock.json（gradle 9.8.1 / detekt / ktfmt / exposed…） |
 
 > 依赖版本与 `version-lock.json` 的 `version_lock` 一致，不引入 lock 外的库。
 
