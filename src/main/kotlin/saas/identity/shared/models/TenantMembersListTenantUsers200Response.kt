@@ -18,14 +18,16 @@ import saas.identity.shared.infrastructure.BadParameterException
 /**
  * 
  * @param items 
- * @param page 
- * @param pageSize 
+ * @param page 页码，0 基（Spring Data Pageable）：首页 page=0。
+ * @param pageSize 每页条数。
  * @param total 
  */
 @Serializable
 data class TenantMembersListTenantUsers200Response(
     val items: kotlin.collections.List<TenantMemberUserView>,
+    /* 页码，0 基（Spring Data Pageable）：首页 page=0。 */
     val page: kotlin.Int,
+    /* 每页条数。 */
     val pageSize: kotlin.Int,
     val total: kotlin.Long
 )

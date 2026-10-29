@@ -89,8 +89,8 @@ interface TenantMembersApiDelegate {
      * 
      * 
      * @param tenantId 
-     * @param page 
-     * @param pageSize 
+     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。
+     * @param pageSize 每页条数。
      * @param status 
      * @param call The Ktor [RoutingCall]
      * @return TenantMembersListTenantUsers200Response
