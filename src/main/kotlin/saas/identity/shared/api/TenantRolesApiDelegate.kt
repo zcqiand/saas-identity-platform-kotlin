@@ -53,11 +53,11 @@ interface TenantRolesApiDelegate {
     suspend fun tenantRolesGetSysRole( tenantId: kotlin.String,  roleId: kotlin.String, call:RoutingCall) : SysRole = throw APINotImplementedException("API operation tenantRolesGetSysRole has not been implemented yet.")
     /**
      * 
-     * 
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
      * @param tenantId 
      * @param clientId 
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。
-     * @param pageSize 每页条数。
+     * @param page 
+     * @param pageSize 
      * @param call The Ktor [RoutingCall]
      * @return TenantRolesListSysRoles200Response
      */

@@ -50,9 +50,9 @@ interface AdminTenantsApiDelegate {
     suspend fun adminTenantsGetTenant( id: kotlin.String, call:RoutingCall) : Tenant = throw APINotImplementedException("API operation adminTenantsGetTenant has not been implemented yet.")
     /**
      * 
-     * 
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。
-     * @param pageSize 每页条数。
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
+     * @param page 
+     * @param pageSize 
      * @param call The Ktor [RoutingCall]
      * @return AdminTenantsListTenants200Response
      */

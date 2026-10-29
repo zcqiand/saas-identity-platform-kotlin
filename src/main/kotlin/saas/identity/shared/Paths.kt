@@ -35,9 +35,9 @@ object Paths {
     @Resource("/api/v1/admin/clients/{clientId}") class adminClientsGetClient(val clientId: kotlin.String)
 
     /**
-     * 
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。 (optional)
-     * @param pageSize 每页条数。 (optional)
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
+     * @param page  (optional)
+     * @param pageSize  (optional)
      */
     @Resource("/api/v1/admin/clients") class adminClientsListClients(val page: kotlin.Int? = null, val pageSize: kotlin.Int? = null)
 
@@ -74,9 +74,9 @@ object Paths {
     @Resource("/api/v1/admin/tenants/{id}") class adminTenantsGetTenant(val id: kotlin.String)
 
     /**
-     * 
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。 (optional)
-     * @param pageSize 每页条数。 (optional)
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
+     * @param page  (optional)
+     * @param pageSize  (optional)
      */
     @Resource("/api/v1/admin/tenants") class adminTenantsListTenants(val page: kotlin.Int? = null, val pageSize: kotlin.Int? = null)
 
@@ -192,10 +192,10 @@ object Paths {
     @Resource("/api/v1/oauth/token") class oAuthToken()
 
     /**
-     * 
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
      * @param tenantId  
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。 (optional)
-     * @param pageSize 每页条数。 (optional)
+     * @param page  (optional)
+     * @param pageSize  (optional)
      */
     @Resource("/api/v1/tenants/{tenantId}/applications") class tenantApplicationsListTenantApplications(val tenantId: kotlin.String, val page: kotlin.Int? = null, val pageSize: kotlin.Int? = null)
 
@@ -266,10 +266,10 @@ object Paths {
     @Resource("/api/v1/tenants/{tenantId}/members/invitations") class tenantMembersInviteTenantUser(val tenantId: kotlin.String)
 
     /**
-     * 
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
      * @param tenantId  
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。 (optional)
-     * @param pageSize 每页条数。 (optional)
+     * @param page  (optional)
+     * @param pageSize  (optional)
      * @param status  (optional)
      */
     @Resource("/api/v1/tenants/{tenantId}/members") class tenantMembersListTenantUsers(val tenantId: kotlin.String, val page: kotlin.Int? = null, val pageSize: kotlin.Int? = null, val status: TenantMemberStatus? = null)
@@ -329,11 +329,11 @@ object Paths {
     @Resource("/api/v1/tenants/{tenantId}/roles/{roleId}") class tenantRolesGetSysRole(val tenantId: kotlin.String, val roleId: kotlin.String)
 
     /**
-     * 
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
      * @param tenantId  
      * @param clientId  (optional)
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。 (optional)
-     * @param pageSize 每页条数。 (optional)
+     * @param page  (optional)
+     * @param pageSize  (optional)
      */
     @Resource("/api/v1/tenants/{tenantId}/roles") class tenantRolesListSysRoles(val tenantId: kotlin.String, val clientId: kotlin.String? = null, val page: kotlin.Int? = null, val pageSize: kotlin.Int? = null)
 

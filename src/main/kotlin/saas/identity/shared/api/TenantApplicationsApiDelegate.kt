@@ -26,10 +26,10 @@ interface TenantApplicationsApiDelegate {
 
     /**
      * 
-     * 
+     * 分页：page 0 基（Spring Data Pageable），首页 page&#x3D;0；pageSize 每页条数。
      * @param tenantId 
-     * @param page 页码，0 基（Spring Data Pageable）：首页 page&#x3D;0。
-     * @param pageSize 每页条数。
+     * @param page 
+     * @param pageSize 
      * @param call The Ktor [RoutingCall]
      * @return TenantApplicationsListTenantApplications200Response
      */

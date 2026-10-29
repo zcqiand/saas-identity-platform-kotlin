@@ -18,11 +18,11 @@ paths:
   /api/v1/admin/clients:
     get:
       operationId: AdminClients_listClients
+      description: 分页：page 0 基（Spring Data Pageable），首页 page=0；pageSize 每页条数。
       parameters:
         - name: page
           in: query
           required: false
-          description: 页码，0 基（Spring Data Pageable）：首页 page=0。
           schema:
             type: integer
             format: int32
@@ -30,7 +30,6 @@ paths:
         - name: pageSize
           in: query
           required: false
-          description: 每页条数。
           schema:
             type: integer
             format: int32
@@ -209,11 +208,11 @@ paths:
   /api/v1/admin/tenants:
     get:
       operationId: AdminTenants_listTenants
+      description: 分页：page 0 基（Spring Data Pageable），首页 page=0；pageSize 每页条数。
       parameters:
         - name: page
           in: query
           required: false
-          description: 页码，0 基（Spring Data Pageable）：首页 page=0。
           schema:
             type: integer
             format: int32
@@ -221,7 +220,6 @@ paths:
         - name: pageSize
           in: query
           required: false
-          description: 每页条数。
           schema:
             type: integer
             format: int32
@@ -805,6 +803,7 @@ paths:
   /api/v1/tenants/{tenantId}/applications:
     get:
       operationId: TenantApplications_listTenantApplications
+      description: 分页：page 0 基（Spring Data Pageable），首页 page=0；pageSize 每页条数。
       parameters:
         - name: tenantId
           in: path
@@ -814,7 +813,6 @@ paths:
         - name: page
           in: query
           required: false
-          description: 页码，0 基（Spring Data Pageable）：首页 page=0。
           schema:
             type: integer
             format: int32
@@ -822,7 +820,6 @@ paths:
         - name: pageSize
           in: query
           required: false
-          description: 每页条数。
           schema:
             type: integer
             format: int32
@@ -957,6 +954,7 @@ paths:
   /api/v1/tenants/{tenantId}/members:
     get:
       operationId: TenantMembers_listTenantUsers
+      description: 分页：page 0 基（Spring Data Pageable），首页 page=0；pageSize 每页条数。
       parameters:
         - name: tenantId
           in: path
@@ -966,7 +964,6 @@ paths:
         - name: page
           in: query
           required: false
-          description: 页码，0 基（Spring Data Pageable）：首页 page=0。
           schema:
             type: integer
             format: int32
@@ -974,7 +971,6 @@ paths:
         - name: pageSize
           in: query
           required: false
-          description: 每页条数。
           schema:
             type: integer
             format: int32
@@ -1253,6 +1249,7 @@ paths:
   /api/v1/tenants/{tenantId}/roles:
     get:
       operationId: TenantRoles_listSysRoles
+      description: 分页：page 0 基（Spring Data Pageable），首页 page=0；pageSize 每页条数。
       parameters:
         - name: tenantId
           in: path
@@ -1268,7 +1265,6 @@ paths:
         - name: page
           in: query
           required: false
-          description: 页码，0 基（Spring Data Pageable）：首页 page=0。
           schema:
             type: integer
             format: int32
@@ -1276,7 +1272,6 @@ paths:
         - name: pageSize
           in: query
           required: false
-          description: 每页条数。
           schema:
             type: integer
             format: int32
