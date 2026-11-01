@@ -33,6 +33,16 @@ gradle run              # 本地起服务（mainClass io.xr.harness.ApplicationK
 | :--- | :--- | :--- |
 | （待补） | | |
 
+### 书一《Kotlin 从入门到项目实践》（卷四）
+
+- 书稿定位：xr-know-020，第 32、33、34 章正文代码块挂本仓 `source=` 锚点
+- 配套版本：`v0.2.1-20261025`（registry 冻结 tag，代码以此为准）
+
+| 章 | 章题 | 对应源文件 |
+| :--- | :--- | :--- |
+| 32 | 项目二启动：SaaS 多租户身份平台设计 | `src/main/kotlin/saas/identity/entity/TenantTable.kt` + `src/main/kotlin/saas/identity/entity/TenantMemberTable.kt` + `src/main/kotlin/saas/identity/entity/TenantMemberRoleTable.kt` + `src/main/kotlin/saas/identity/shared/models/Tenant.kt` + `src/main/kotlin/saas/identity/shared/models/TenantMembership.kt` + `src/main/kotlin/saas/identity/impl/AdminTenantsApiServiceImpl.kt` + `src/main/kotlin/saas/identity/impl/MeApiServiceImpl.kt` |
+| 33 | 项目二：租户管理与数据隔离 | `src/main/kotlin/saas/identity/impl/AdminTenantsApiServiceImpl.kt` + `src/main/kotlin/saas/identity/impl/MeApiServiceImpl.kt` + `src/main/kotlin/saas/identity/entity/TenantTable.kt` + `src/main/kotlin/saas/identity/entity/TenantMemberTable.kt` + `src/main/kotlin/saas/identity/shared/models/SwitchTenantResponse.kt` + `src/test/kotlin/io/xr/harness/AdminTenantsListTest.kt` + `src/test/kotlin/io/xr/harness/MeApiTest.kt` |
+| 34 | 项目二：认证、SSO 与 RBAC 菜单授权 | `src/main/kotlin/saas/identity/impl/AuthApiServiceImpl.kt` + `src/main/kotlin/saas/identity/impl/OauthApiServiceImpl.kt` + `src/main/kotlin/saas/identity/impl/MeApiServiceImpl.kt` + `src/main/kotlin/saas/identity/impl/Password.kt` + `src/main/kotlin/saas/identity/impl/TokenPair.kt` + `src/main/kotlin/saas/identity/impl/JwtIssuer.kt` + `src/main/kotlin/saas/identity/entity/OauthCodeTable.kt` + `src/main/kotlin/saas/identity/entity/OauthAccessTokenTable.kt` + `src/main/kotlin/saas/identity/entity/OauthRefreshTokenTable.kt` + `src/main/kotlin/saas/identity/entity/SysMenuTable.kt` + `src/main/kotlin/saas/identity/entity/SysRoleMenuTable.kt` + `src/main/kotlin/saas/identity/shared/models/EffectiveMenuNode.kt` + `src/test/kotlin/io/xr/harness/AuthLoginTest.kt` + `src/test/kotlin/io/xr/harness/OauthApiTest.kt` + `src/test/kotlin/io/xr/harness/MeApiTest.kt` + `src/test/kotlin/io/xr/harness/IdpFlowTest.kt` |
 ## 快速链接
 
 - [CLAUDE.md](CLAUDE.md) — 开发约定与编码规范

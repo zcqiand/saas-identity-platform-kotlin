@@ -1,0 +1,97 @@
+{
+  "_schema": "code-suite-handoff v1",
+  "_note": "写书的事实底，非逐字引用源。book 引用该 tag 的终态文件(带 source=)；此清单供作者对账建造顺序。",
+  "project": "saas-identity-platform-kotlin",
+  "tag": "v0.2.1-20261025",
+  "stack": "ktor",
+  "gate_proof": {
+    "tag": "v0.2.1-20261025",
+    "checked_at": "2026-10-31T07:03:54+00:00",
+    "verified": true,
+    "all_green": true,
+    "method": "gate.py --all",
+    "gate_command": "D:\\qiand-life\\1-projects\\xr-code-suite\\scripts\\gate.py -p saas-identity-platform-kotlin"
+  },
+  "function_tree": [
+    {
+      "fn_id": "M00.F01.I01",
+      "name": "租户列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F01.I01",
+      "name": "当前用户 whoami",
+      "type": "查询",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F03.I01",
+      "name": "列出我的租户成员关系",
+      "type": "查询",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F03.I02",
+      "name": "切换当前租户",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F04.I01",
+      "name": "密码登录",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F04.I02",
+      "name": "失败锁定",
+      "type": null,
+      "status": "已废弃"
+    },
+    {
+      "fn_id": "M01.F04.I04",
+      "name": "OIDC Code 换取",
+      "type": null,
+      "status": "已废弃"
+    },
+    {
+      "fn_id": "M01.F04.I05",
+      "name": "refresh token",
+      "type": null,
+      "status": "已废弃"
+    },
+    {
+      "fn_id": "M01.F04.I06",
+      "name": "登出（本地清理 + 全局 SSO）",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F04.I07",
+      "name": "登出（全局 SSO）",
+      "type": null,
+      "status": "已废弃"
+    },
+    {
+      "fn_id": "M04.F03.I01",
+      "name": "授权码签发",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F03.I02",
+      "name": "OIDC token 端点（双 grant）",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F04.I08",
+      "name": "当前用户有效菜单",
+      "type": "查询",
+      "status": "已上线"
+    }
+  ],
+  "trace": [],
+  "source_index": []
+}
