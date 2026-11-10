@@ -8,3 +8,7 @@
 - `v0.2.0-20261025`（2026-10-25）— feat(docs): REQ-2026-003 swagger 文档面——shared openapi.yaml 派生零漂移 + webjar + 根跳转
 - `v0.1.1-20261025`（2026-10-25）— fix(deploy): HEALTHCHECK --spider 发 HEAD 被 ktor /health 405——改 GET 真拉（首航指纹三）
 - `v0.1.0-20261025`（2026-10-25）— fix(deploy): COPY 尾斜杠语义——dist 内容摊进 /app，ENTRYPOINT 改 /app/bin/app（CI 指纹二连）
+
+## [Unreleased]
+
+- chore(rename): 系统显示名统一（suite 全家族批）——「实验室管理系统」→「建筑工程实验室管理系统」；「身份平台」名称位（标题/品牌/包描述/UI 标签）→「SaaS 多租户多应用身份平台」，行文短称保留。同批兄弟仓同节奏提交。
